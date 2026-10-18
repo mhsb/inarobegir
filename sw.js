@@ -50,3 +50,38 @@ self.addEventListener('fetch', e => {
   }
   // Everything else (Supabase API, auth, realtime) goes straight to the network.
 });
+
+// ---------- Push notifications ----------
+self.addEventListener('push', e => {
+  let d = {};
+  try { d = e.data ? e.data.json() : {}; } catch (_) { d = { body: e.data ? e.data.text() : '' }; }
+  e.waitUntil((async () => {
+    // Android/desktop: no banner if the app is open on screen (the app shows its own notice).
+    // iPhone requires every push to show something, so it never skips.
+    if (!/iPhone|iPad|iPod/.test(self.navigator.userAgent)) {
+      const wins = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
+      if (wins.some(c => c.visibilityState === 'visible')) return;
+    }
+    await self.registration.showNotification(d.title || 'ایناروبگیر', {
+      body: d.body || '',
+      icon: 'icon-192.png',
+      badge: 'icon-192.png',
+      tag: d.tag || undefined,
+      renotify: !!(d.tag && d.renotify),
+      lang: 'fa',
+      dir: 'rtl',
+      data: { url: d.url || './' },
+    });
+  })());
+});
+
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  const url = new URL((e.notification.data && e.notification.data.url) || './', self.registration.scope).href;
+  e.waitUntil(self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then(wins => {
+    for (const c of wins) {
+      if ('focus' in c) { c.postMessage({ type: 'open', url }); return c.focus(); }
+    }
+    return self.clients.openWindow(url);
+  }));
+});

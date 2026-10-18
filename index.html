@@ -426,6 +426,9 @@ create table if not exists price_history (
     .shelf .list[hidden] { display: none; }
     .qty-in { width: 64px; }
     .tool .ti { position: relative; }
+    .kv { display: flex; gap: 6px; align-items: center; margin-top: 8px; }
+    .kv label { flex: none; width: 118px; font-size: 12px; color: var(--muted); direction: ltr; text-align: left; }
+    .kv input { flex: 1; min-width: 0; direction: ltr; font-size: 12px; }
     .badge { position: absolute; top: -5px; inset-inline-end: -6px; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px; background: var(--danger-solid, #d33); color: #fff; font: 700 11px/18px inherit; font-style: normal; text-align: center; }
     .badge[hidden] { display: none; }
     /* Four tools must always fit the screen: icon above label, never wider than the phone. */
@@ -935,6 +938,12 @@ create table if not exists price_history (
         <button class="btn" id="exportBtn" type="button" style="margin-top:10px">دانلود نسخه پشتیبان</button>
       </section>
 
+      <section class="rep-sec" id="pushSec">
+        <h3>اعلان‌ها</h3>
+        <p class="rep-note" id="pushNote">پیام‌های جدید گفتگو و خریدهای اعضای دیگر را حتی وقتی برنامه بسته است اطلاع می‌دهد.</p>
+        <button class="btn btn-primary" id="pushBtn" type="button" style="margin-top:10px">روشن کردن اعلان</button>
+      </section>
+
       <section class="rep-sec" id="installSec">
         <h3>نصب برنامه</h3>
         <p class="rep-note">روی صفحه اصلی گوشی اضافه می‌شود و بدون نوار مرورگر باز می‌شود.</p>
@@ -1011,6 +1020,12 @@ create table if not exists price_history (
         <option value="7">۷ روز اخیر</option><option value="30" selected>۳۰ روز اخیر</option><option value="90">۹۰ روز اخیر</option>
       </select>
       <div id="admBody"></div>
+      <section class="rep-sec" id="pushSetup">
+        <h3>راه‌اندازی اعلان‌ها</h3>
+        <p class="rep-note">یک بار برای کل برنامه. کلیدها روی همین دستگاه ساخته می‌شوند و فقط همین یک بار نمایش داده می‌شوند؛ آن‌ها را در Supabase › Edge Functions › Secrets ذخیره کنید.</p>
+        <button class="btn" id="pushSetupBtn" type="button" style="margin-top:10px">ساخت کلیدهای اعلان</button>
+        <div id="pushSetupOut"></div>
+      </section>
     </div>
   </dialog>
 
@@ -3503,6 +3518,7 @@ notify pgrst, 'reload schema';`;
         const want = [joinedId, saved].find(id => id && state.lists.some(l => l.id === id)) || state.lists[0].id;
         if (quick && want === state.listId) { updateListTitle(); await quick; }
         else await selectList(want);
+        applyDeepLink();
       } catch (e) {
         console.error(e);
         const m = String((e && e.message) || '');
@@ -3618,6 +3634,7 @@ notify pgrst, 'reload schema';`;
     });
     $('signOutBtn').addEventListener('click', async () => {
       $('listsDlg').close();
+      await pushDropQuiet();
       await db.auth.signOut();
     });
 
@@ -3635,6 +3652,7 @@ notify pgrst, 'reload schema';`;
       $('statsOpt').checked = Track.enabled(); $('statsOpt').disabled = Track.dnt();
       $('statsOptTxt').textContent = Track.dnt() ? 'خاموش است (مرورگر شما Do Not Track را فعال کرده)' : 'ارسال آمار ناشناس';
       $('pwNew').value = ''; $('delConfirm').value = ''; $('delBtn').disabled = true; $('acctSqlBox').hidden = true;
+      refreshPushUI();
       $('acctDlg').showModal();
     });
 
@@ -3862,6 +3880,90 @@ notify pgrst, 'reload schema';`;
       addEventListener('load', () => navigator.serviceWorker.register('./sw.js').catch(() => { /* app still works without it */ }));
     }
 
+    // ---------- Push notifications ----------
+    const pushOK = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+    const swReady = () => Promise.race([navigator.serviceWorker.ready, new Promise(r => setTimeout(() => r(null), 3000))]);
+    const b64u = buf => btoa(String.fromCharCode(...new Uint8Array(buf))).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+    const keyToBytes = b => { const t = (b + '='.repeat((4 - b.length % 4) % 4)).replace(/-/g, '+').replace(/_/g, '/'); return Uint8Array.from(atob(t), c => c.charCodeAt(0)); };
+    async function currentSub() {
+      if (!pushOK()) return null;
+      try { const reg = await swReady(); return reg ? await reg.pushManager.getSubscription() : null; } catch (e) { return null; }
+    }
+    async function refreshPushUI() {
+      const note = $('pushNote'), btn = $('pushBtn');
+      const set = (text, label) => { note.textContent = text; btn.hidden = !label; if (label) btn.textContent = label; };
+      if (!pushOK()) return set('این مرورگر اعلان را پشتیبانی نمی‌کند.', '');
+      if (isIOS && !isStandalone()) return set('در آیفون ابتدا برنامه را به صفحه اصلی اضافه کنید (بخش «نصب برنامه») و از همان‌جا باز کنید.', '');
+      if (Notification.permission === 'denied') return set('اعلان برای این برنامه در تنظیمات مرورگر یا گوشی بسته شده است.', '');
+      const sub = await currentSub();
+      set(sub ? 'اعلان پیام‌های گفتگو و خریدهای دیگران روی این دستگاه روشن است.' : 'پیام‌های جدید گفتگو و خریدهای اعضای دیگر را حتی وقتی برنامه بسته است اطلاع می‌دهد.',
+          sub ? 'خاموش کردن اعلان' : 'روشن کردن اعلان');
+    }
+    async function pushEnable() {
+      const perm = await Notification.requestPermission();
+      if (perm !== 'granted') { toast('اجازه اعلان داده نشد.', 'error'); return; }
+      const k = await db.rpc('get_push_key');
+      if (k.error || !k.data) { toast('اعلان هنوز توسط مدیر برنامه راه‌اندازی نشده است.', 'error'); return; }
+      const reg = await swReady();
+      if (!reg) { toast('برنامه برای اعلان باید روی https باز شده باشد.', 'error'); return; }
+      let sub = await reg.pushManager.getSubscription();
+      if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: keyToBytes(k.data) });
+      const j = sub.toJSON();
+      const r = await db.rpc('save_push_sub', { p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_ua: navigator.userAgent });
+      if (r.error) throw r.error;
+      Track.event('push_enabled');
+      toast('اعلان روشن شد.');
+    }
+    async function pushDisable() {
+      const sub = await currentSub();
+      if (sub) { const ep = sub.endpoint; try { await sub.unsubscribe(); } catch (e) { /* ignore */ } try { await db.from('push_subscriptions').delete().eq('endpoint', ep); } catch (e) { /* ignore */ } }
+      toast('اعلان خاموش شد.');
+    }
+    async function pushDropQuiet() {       // on sign-out, so the next person on this phone doesn't get your notifications
+      try { const sub = await currentSub(); if (sub) { const ep = sub.endpoint; await sub.unsubscribe(); await db.from('push_subscriptions').delete().eq('endpoint', ep); } } catch (e) { /* ignore */ }
+    }
+    $('pushBtn').addEventListener('click', async () => {
+      $('pushBtn').disabled = true;
+      try { if (await currentSub()) await pushDisable(); else await pushEnable(); }
+      catch (e) { console.error(e); toast('انجام نشد. دوباره تلاش کنید.', 'error'); }
+      $('pushBtn').disabled = false; refreshPushUI();
+    });
+
+    // Admin: make the VAPID keys in the browser (nothing leaves this device except the public key).
+    async function pushSetup() {
+      const ex = await db.rpc('get_push_key');
+      if (ex.error) { toast('ابتدا فایل supabase-push-update.sql را اجرا کنید.', 'error'); return; }
+      if (ex.data && !window.confirm('کلیدها قبلاً ساخته شده‌اند. با ساخت دوباره، اعلان همه دستگاه‌ها قطع می‌شود و باید دوباره روشنش کنند. ادامه می‌دهید؟')) return;
+      const kp = await crypto.subtle.generateKey({ name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']);
+      const pub = b64u(await crypto.subtle.exportKey('raw', kp.publicKey));
+      const priv = (await crypto.subtle.exportKey('jwk', kp.privateKey)).d;
+      const sec = [...crypto.getRandomValues(new Uint8Array(24))].map(b => b.toString(16).padStart(2, '0')).join('');
+      const r = await db.rpc('set_push_config', { p_public: pub, p_url: SUPABASE_URL + '/functions/v1/push', p_secret: sec });
+      if (r.error) { toast('ذخیره نشد.', 'error'); return; }
+      const rows = [['VAPID_PUBLIC_KEY', pub], ['VAPID_PRIVATE_KEY', priv], ['VAPID_SUBJECT', 'mailto:' + (state.user.email || '')], ['WEBHOOK_SECRET', sec]];
+      $('pushSetupOut').innerHTML = rows.map(([k, v]) => `<div class="kv"><label>${k}</label><input class="field" readonly value="${esc(v)}"><button class="btn" type="button" data-copy="${esc(v)}">کپی</button></div>`).join('')
+        + '<p class="rep-note" style="margin-top:10px">این چهار مقدار را با همین نام‌ها در Secrets بگذارید و تابعی به نام <b>push</b> بسازید.</p>';
+    }
+    $('pushSetupBtn').addEventListener('click', () => pushSetup().catch(e => { console.error(e); toast('ساخت کلید انجام نشد.', 'error'); }));
+    $('pushSetupOut').addEventListener('click', async e => {
+      const b = e.target.closest('[data-copy]');
+      if (!b) return;
+      try { await navigator.clipboard.writeText(b.dataset.copy); toast('کپی شد.'); } catch (err) { b.previousElementSibling.select(); toast('متن انتخاب شد؛ دستی کپی کنید.'); }
+    });
+
+    // Tapping a notification: jump to that list (and its chat).
+    async function applyDeepLink(urlStr) {
+      try {
+        const u = new URL(urlStr || location.href, location.href);
+        const lid = Number(u.searchParams.get('list')), open = u.searchParams.get('open');
+        if (!lid || !state.lists.some(l => l.id === lid)) return;
+        if (lid !== state.listId) await selectList(lid);
+        if (open === 'chat') openChat();
+      } catch (e) { /* ignore */ }
+      finally { if (location.search.includes('list=')) history.replaceState(null, '', location.pathname + location.hash); }
+    }
+    if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', e => { if (e.data && e.data.type === 'open') applyDeepLink(e.data.url); });
+
     // ---------- Usage stats switch + admin stats screen ----------
     let isAdmin = false;
     async function checkAdmin() {
@@ -3870,8 +3972,8 @@ notify pgrst, 'reload schema';`;
     }
     const EVT = { landing_view: 'دیدن صفحه معرفی', signup: 'ثبت‌نام', login: 'ورود', app_open: 'باز کردن برنامه', item_added: 'افزودن کالا',
       item_bought: 'ثبت خرید کالا', trip_ended: 'پایان یک خرید', report_opened: 'دیدن گزارش', list_created: 'ساخت لیست جدید',
-      invite_created: 'ساخت لینک دعوت', invite_joined: 'پیوستن با دعوت', install_click: 'زدن دکمه نصب', chat_sent: 'ارسال پیام گفتگو', pwa_installed: 'نصب برنامه', export_data: 'نسخه پشتیبان' };
-    const FUNNEL = ['landing_view', 'signup', 'app_open', 'item_added', 'item_bought', 'trip_ended', 'invite_created', 'invite_joined', 'chat_sent', 'install_click', 'pwa_installed'];
+      invite_created: 'ساخت لینک دعوت', invite_joined: 'پیوستن با دعوت', install_click: 'زدن دکمه نصب', chat_sent: 'ارسال پیام گفتگو', push_enabled: 'روشن کردن اعلان', pwa_installed: 'نصب برنامه', export_data: 'نسخه پشتیبان' };
+    const FUNNEL = ['landing_view', 'signup', 'app_open', 'item_added', 'item_bought', 'trip_ended', 'invite_created', 'invite_joined', 'chat_sent', 'push_enabled', 'install_click', 'pwa_installed'];
     const dayFmt = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { month: 'short', day: 'numeric' });
     function daySeries(arr) {
       const rows = (arr || []).slice(-14), max = Math.max(1, ...rows.map(x => x.n));

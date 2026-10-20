@@ -456,6 +456,72 @@ create table if not exists price_history (
     .chat-form textarea { flex: 1; resize: none; max-height: 120px; min-height: 44px; }
     .chat-note { margin: auto; text-align: center; color: var(--muted); font-size: 14px; line-height: 1.9; }
 
+    /* ---------- Welcome: live demo ---------- */
+    .dm-lead { text-align: center; color: var(--muted); margin: 6px auto 18px; max-width: 460px; line-height: 1.9; }
+    .dm { position: relative; max-width: 380px; margin: 0 auto 22px; padding: 14px 14px 12px; border-radius: 24px; background: var(--surface); color: var(--ink); border: 1px solid var(--line); box-shadow: 0 24px 50px rgba(20,22,70,.22); }
+    .dm-bar { display: flex; justify-content: space-between; align-items: center; font-size: 16px; padding: 2px 4px 8px; }
+    .dm-bar span { font-size: 12px; color: var(--muted); }
+    .dm-prog { height: 7px; border-radius: 99px; background: var(--tint); overflow: hidden; }
+    .dm-prog i { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, var(--accent), var(--saffron)); transition: width .45s cubic-bezier(.2,.8,.2,1); }
+    .dm-sum { display: flex; gap: 10px; margin: 10px 0 6px; }
+    .dm-sum > div { flex: 1; padding: 8px 10px; border-radius: 12px; background: var(--tint); font-size: 12px; }
+    .dm-sum small { display: block; color: var(--muted); }
+    .dm-sum b { font-size: 17px; }
+    .dm-tabs { display: flex; gap: 6px; margin: 8px 0; }
+    .dm-tabs button { flex: 1; position: relative; min-height: 38px; border: 0; border-radius: 10px; background: none; color: var(--muted); font: inherit; font-size: 14px; cursor: pointer; }
+    .dm-tabs button[aria-selected="true"] { background: var(--tint); color: var(--ink); font-weight: 700; }
+    .dm-badge { position: absolute; top: 4px; inset-inline-end: 10px; min-width: 16px; height: 16px; border-radius: 8px; padding: 0 4px; background: #d33; color: #fff; font: 700 10px/16px inherit; font-style: normal; text-align: center; }
+    .dm-badge[hidden], .dm-toast[hidden], .dm-pane[hidden] { display: none; }
+    .dm-pane { min-height: 292px; max-height: 292px; overflow-y: auto; overscroll-behavior: contain; }
+    .dm-sh { display: flex; align-items: center; gap: 8px; width: 100%; margin: 6px 0 2px; padding: 4px 2px; border: 0; background: none; color: var(--ink); font: inherit; font-size: 13px; font-weight: 700; cursor: pointer; text-align: start; }
+    .dm-sh::before { content: ""; width: 9px; height: 9px; border-radius: 3px; background: var(--sc); }
+    .dm-sh .chev { transition: transform .2s; color: var(--muted); }
+    .dm-sh.f .chev { transform: rotate(90deg); }
+    .dm-sh em { margin-inline-start: auto; font-style: normal; font-weight: 500; font-size: 12px; color: var(--muted); }
+    .dm-row { display: flex; align-items: center; gap: 10px; width: 100%; padding: 9px 4px; border: 0; border-top: 1px solid var(--line); background: none; color: inherit; font: inherit; font-size: 15px; text-align: start; cursor: pointer; }
+    .dm-tick { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--accent); transition: background .2s, box-shadow .2s; }
+    .dm-row.on .dm-tick { background: var(--accent); box-shadow: inset 0 0 0 4px var(--surface); }
+    .dm-row.on .dm-n { text-decoration: line-through; color: var(--muted); }
+    .dm-n { flex: 1; }
+    .dm-p { font-size: 12px; color: var(--muted); }
+    .dm-who { flex: none; width: 20px; height: 20px; border-radius: 50%; background: var(--wc); color: #fff; font-size: 11px; font-weight: 700; line-height: 20px; text-align: center; }
+    .dm-row.pop { animation: dmPop .4s ease; }
+    @keyframes dmPop { 40% { transform: scale(1.03); background: var(--tint); } }
+    .dm-add { display: flex; gap: 6px; margin-top: 8px; }
+    .dm-add input { flex: 1; min-width: 0; min-height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg); color: var(--ink); font: inherit; font-size: 14px; }
+    .dm-add button { min-height: 40px; padding: 0 14px; border: 0; border-radius: 10px; background: var(--accent); color: #fff; font: inherit; font-size: 14px; cursor: pointer; }
+    .dm-chat { display: flex; flex-direction: column; gap: 6px; padding-bottom: 6px; }
+    .dm-msg { max-width: 82%; padding: 6px 11px; border-radius: 14px; background: var(--tint); font-size: 14px; line-height: 1.7; align-self: flex-end; animation: dmPop .35s ease; }
+    .dm-msg.me { align-self: flex-start; background: var(--accent); color: #fff; }
+    .dm-msg b { display: block; font-size: 11px; color: var(--wc); }
+    .dm-rb { margin: 10px 2px; font-size: 13px; }
+    .dm-rb div { display: flex; justify-content: space-between; margin-bottom: 4px; }
+    .dm-rb i { display: block; height: 8px; border-radius: 99px; background: var(--sc); transition: width .45s; }
+    .dm-rb .tr { height: 8px; border-radius: 99px; background: var(--tint); overflow: hidden; }
+    .dm-empty { padding: 28px 12px; text-align: center; color: var(--muted); font-size: 14px; line-height: 1.9; }
+    .dm-toast { position: absolute; inset-inline: 14px; bottom: 44px; padding: 9px 12px; border-radius: 12px; background: var(--ink); color: var(--bg); font-size: 13px; text-align: center; box-shadow: 0 8px 20px rgba(0,0,0,.3); animation: dmPop .4s ease; }
+    .dm-hint { margin: 8px 2px 0; text-align: center; font-size: 12.5px; color: var(--accent); font-weight: 700; min-height: 18px; }
+
+    /* ---------- Guided tour ---------- */
+    .tour[hidden] { display: none; }
+    .tour-b { position: fixed; z-index: 300; background: rgba(10,12,40,.66); touch-action: none; }
+    .tour-ring { position: fixed; z-index: 301; border: 3px solid var(--saffron); border-radius: 14px; box-shadow: 0 0 0 4px rgba(255,179,0,.25); pointer-events: none; transition: all .25s ease; }
+    .tour-card { position: fixed; z-index: 302; inset-inline: 0; margin-inline: auto; width: min(92vw, 340px); padding: 14px 16px 12px; border-radius: 16px; background: var(--surface); color: var(--ink); box-shadow: 0 14px 40px rgba(0,0,0,.4); animation: sheetIn .3s ease both; }
+    .tour-card .tstep { font-size: 11px; color: var(--muted); }
+    .tour-card h3 { margin: 2px 0 4px; font-size: 17px; }
+    .tour-card p { margin: 0 0 10px; font-size: 14px; line-height: 1.9; color: var(--ink); }
+    .tour-card .twait { color: var(--accent); font-weight: 700; }
+    .tour-actions { display: flex; gap: 8px; justify-content: space-between; }
+    .tour-actions .btn { min-height: 40px; }
+    .fb-kinds, .fb-stars { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0; }
+    .fb-kinds button { flex: 1 1 auto; min-height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: 10px; background: none; color: var(--ink); font: inherit; font-size: 14px; cursor: pointer; }
+    .fb-kinds button[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+    .fb-stars button { width: 40px; height: 40px; border: 0; background: none; font-size: 28px; line-height: 1; color: var(--line); cursor: pointer; }
+    .fb-stars button.on { color: var(--saffron); }
+    .fbi { margin-top: 10px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 12px; font-size: 14px; line-height: 1.8; }
+    .fbi small { color: var(--muted); }
+    .fbi .acts { display: flex; gap: 8px; margin-top: 6px; }
+
     /* ---------- Installed-app polish ---------- */
     html { -webkit-tap-highlight-color: transparent; }
     button, .btn, .row, select, summary { touch-action: manipulation; -webkit-touch-callout: none; }
@@ -725,6 +791,29 @@ create table if not exists price_history (
         </div>
       </section>
 
+    <section class="land-sec alt" id="demoSec">
+      <div class="wrap">
+        <h2 class="reveal">داخل برنامه را امتحان کنید</h2>
+        <p class="dm-lead reveal">این نمونه واقعی است و ثبت‌نام نمی‌خواهد. به کالاها بزنید، چیزی اضافه کنید یا برای «سارا» پیام بدهید.</p>
+        <div class="dm reveal" id="dm">
+          <div class="dm-bar"><b>خرید آخر هفته</b><span id="dmProg"></span></div>
+          <div class="dm-prog" aria-hidden="true"><i id="dmFill"></i></div>
+          <div class="dm-sum"><div><small>خرج شده</small><b id="dmSpent">۰</b> تومان</div><div><small>مانده (برآورد)</small><b id="dmLeft">۰</b> تومان</div></div>
+          <div class="dm-tabs" role="tablist">
+            <button type="button" role="tab" aria-selected="true" data-tab="list">لیست</button>
+            <button type="button" role="tab" aria-selected="false" data-tab="chat">گفتگو<i class="dm-badge" id="dmBadge" hidden></i></button>
+            <button type="button" role="tab" aria-selected="false" data-tab="rep">گزارش</button>
+          </div>
+          <div class="dm-pane" id="dmList"></div>
+          <div class="dm-pane" id="dmChat" hidden></div>
+          <div class="dm-pane" id="dmRep" hidden></div>
+          <div class="dm-toast" id="dmToast" role="status" hidden></div>
+          <p class="dm-hint" id="dmHint"></p>
+        </div>
+        <div class="cta-row center reveal"><button class="cta solid" type="button" data-go="signup">مال خودم را بسازم</button></div>
+      </div>
+    </section>
+
       <section class="land-sec">
         <div class="wrap">
           <h2 class="reveal">آشنا به نظر می‌رسه؟</h2>
@@ -938,6 +1027,14 @@ create table if not exists price_history (
         <button class="btn" id="exportBtn" type="button" style="margin-top:10px">دانلود نسخه پشتیبان</button>
       </section>
 
+      <section class="rep-sec">
+        <h3>آموزش و بازخورد</h3>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:8px">
+          <button class="btn" id="tourBtn" type="button">آموزش گام‌به‌گام</button>
+          <button class="btn" id="fbBtn" type="button">ارسال بازخورد</button>
+        </div>
+      </section>
+
       <section class="rep-sec" id="pushSec">
         <h3>اعلان‌ها</h3>
         <p class="rep-note" id="pushNote">پیام‌های جدید گفتگو و خریدهای اعضای دیگر را حتی وقتی برنامه بسته است اطلاع می‌دهد.</p>
@@ -997,6 +1094,48 @@ create table if not exists price_history (
     </div>
   </dialog>
 
+  <div class="tour" id="tour" hidden>
+    <div class="tour-b" id="tb1"></div><div class="tour-b" id="tb2"></div><div class="tour-b" id="tb3"></div><div class="tour-b" id="tb4"></div><div class="tour-b" id="tb5"></div>
+    <div class="tour-ring" id="tring" hidden></div>
+    <div class="tour-card" id="tcard" role="dialog" aria-live="polite" aria-label="آموزش">
+      <div class="tstep" id="tstep"></div>
+      <h3 id="ttitle"></h3>
+      <p id="ttext"></p>
+      <p class="twait" id="twait" hidden>← خودتان امتحان کنید؛ خودکار می‌رویم مرحله بعد.</p>
+      <div class="tour-actions"><button class="btn" id="tskip" type="button">رد کردن</button><button class="btn btn-primary" id="tnext" type="button">بعدی</button></div>
+    </div>
+  </div>
+
+  <dialog class="sheet" id="fbDlg" aria-labelledby="fbTitle">
+    <div class="sheet-in">
+      <div class="sheet-head">
+        <h2 id="fbTitle">بازخورد</h2>
+        <button class="btn" id="fbClose" type="button">بستن</button>
+      </div>
+      <div id="fbForm">
+        <p class="rep-note">ایده، مشکل یا هر چیزی که فکر می‌کنید برنامه را بهتر می‌کند. هر پیام خوانده می‌شود.</p>
+        <div class="fb-kinds" id="fbKinds" role="group" aria-label="نوع پیام">
+          <button type="button" data-kind="idea" aria-pressed="true">ایده</button>
+          <button type="button" data-kind="bug" aria-pressed="false">مشکل</button>
+          <button type="button" data-kind="question" aria-pressed="false">سؤال</button>
+          <button type="button" data-kind="thanks" aria-pressed="false">تشکر</button>
+        </div>
+        <p class="rep-note" style="margin:6px 0 0">از ۱ تا ۵ از برنامه راضی هستید؟ (اختیاری)</p>
+        <div class="fb-stars" id="fbStars" role="group" aria-label="امتیاز">
+          <button type="button" data-n="1" aria-label="۱ ستاره">★</button><button type="button" data-n="2" aria-label="۲ ستاره">★</button><button type="button" data-n="3" aria-label="۳ ستاره">★</button><button type="button" data-n="4" aria-label="۴ ستاره">★</button><button type="button" data-n="5" aria-label="۵ ستاره">★</button>
+        </div>
+        <textarea class="field" id="fbText" rows="5" maxlength="2000" placeholder="بنویسید…" aria-label="متن پیام"></textarea>
+        <label class="rep-note" style="display:flex;gap:8px;align-items:center;margin:10px 0"><input type="checkbox" id="fbReply" checked> <span>اجازه می‌دهم با ایمیل حسابم پاسخ بدهید</span></label>
+        <button class="btn btn-primary" id="fbSend" type="button" style="width:100%">ارسال</button>
+        <p class="rep-note" id="fbNote" role="status" style="margin-top:8px"></p>
+      </div>
+      <div id="fbThanks" hidden>
+        <p class="dm-empty">ممنون! پیام شما ثبت شد.</p>
+        <button class="btn btn-primary" id="fbDone" type="button" style="width:100%">بستن</button>
+      </div>
+    </div>
+  </dialog>
+
   <dialog class="sheet" id="iosDlg" aria-labelledby="iosTitle">
     <div class="sheet-in">
       <div class="sheet-head">
@@ -1025,6 +1164,11 @@ create table if not exists price_history (
         <p class="rep-note">یک بار برای کل برنامه. کلیدها روی همین دستگاه ساخته می‌شوند و فقط همین یک بار نمایش داده می‌شوند؛ آن‌ها را در Supabase › Edge Functions › Secrets ذخیره کنید.</p>
         <button class="btn" id="pushSetupBtn" type="button" style="margin-top:10px">ساخت کلیدهای اعلان</button>
         <div id="pushSetupOut"></div>
+      </section>
+      <section class="rep-sec">
+        <h3>بازخوردها</h3>
+        <select class="field" id="fbFilter" aria-label="فیلتر"><option value="new">جدید</option><option value="done">انجام‌شده</option><option value="all">همه</option></select>
+        <div id="fbAdminBody"></div>
       </section>
     </div>
   </dialog>
@@ -1767,6 +1911,7 @@ notify pgrst, 'reload schema';`;
         try { const r = await db.from('app_events').insert(batch); if (r.error) dead = true; } catch (e) { dead = true; }   // table missing/blocked: stop quietly
       }
       function event(name, props) {
+        if (typeof tourNotify === 'function') tourNotify(name);
         if (dead || !enabled()) return;
         q.push({ device: did(), event: name, signed_in: !!state.user, props: props || null });
         if (q.length >= 10) flush(); else if (!timer) timer = setTimeout(flush, 4000);
@@ -3519,6 +3664,7 @@ notify pgrst, 'reload schema';`;
         if (quick && want === state.listId) { updateListTitle(); await quick; }
         else await selectList(want);
         applyDeepLink();
+        maybeStartTour();
       } catch (e) {
         console.error(e);
         const m = String((e && e.message) || '');
@@ -3838,6 +3984,268 @@ notify pgrst, 'reload schema';`;
       vv.addEventListener('resize', fitChat); vv.addEventListener('scroll', fitChat);
     }
 
+    // ---------- Welcome: interactive demo (no account, no server) ----------
+    (function initDemo() {
+      const root = $('dm');
+      if (!root) return;
+      const SH = [
+        { n: 'لبنیات', c: 'var(--c3)', items: [['شیر', 45000], ['ماست', 38000], ['پنیر', 120000]] },
+        { n: 'میوه و سبزی', c: 'var(--c6)', items: [['سیب', 90000], ['خیار', 30000]] },
+        { n: 'خواربار', c: 'var(--c4)', items: [['برنج', 350000], ['روغن', 210000]] },
+      ];
+      const REPLIES = ['باشه، همین را می‌گیرم 👍', 'نان هم بگیرم؟', 'تو صف صندوقم، پنج دقیقه دیگه می‌رسم', 'قیمتش را تو لیست زدم ✓'];
+      const SARA = 'var(--c2)', ME = 'var(--accent)';
+      let items, folded, chat, tab, used, partnerDone, ri, unread, hintStep;
+      let toastT = null, partnerT = null;
+      const $d = s => root.querySelector(s);
+      function reset() {
+        items = []; SH.forEach((s, si) => s.items.forEach(([n, p]) => items.push({ id: items.length, n, p, sh: si, by: null })));
+        folded = new Set(); tab = 'list'; used = false; partnerDone = false; ri = 0; unread = 0; hintStep = 0;
+        chat = [{ who: 'sara', t: 'سلام! من تو راه سوپرمارکتم. چیزی لازم داری؟' }];
+        clearTimeout(partnerT); draw();
+      }
+      function say(t) { const el = $('dmToast'); el.textContent = t; el.hidden = false; clearTimeout(toastT); toastT = setTimeout(() => { el.hidden = true; }, 2600); }
+      function hint(t) { $('dmHint').textContent = t; }
+      function markUsed() { if (!used) { used = true; Track.event('demo_used'); } }
+      function drawList() {
+        const el = $('dmList'); el.textContent = '';
+        SH.concat(items.some(i => i.sh === 3) ? [{ n: 'متفرقه', c: 'var(--c5)' }] : []).forEach((s, si) => {
+          const arr = items.filter(i => i.sh === si);
+          if (!arr.length) return;
+          const f = folded.has(si);
+          const h = document.createElement('button');
+          h.type = 'button'; h.className = 'dm-sh' + (f ? ' f' : ''); h.style.setProperty('--sc', s.c); h.dataset.fold = si;
+          h.setAttribute('aria-expanded', String(!f));
+          const left = arr.filter(i => !i.by).reduce((t, i) => t + i.p, 0);
+          h.innerHTML = '<svg class="chev" viewBox="0 0 12 12" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 4.5l4 4 4-4"/></svg>';
+          h.append(s.n); const em = document.createElement('em'); em.textContent = fmt(arr.length) + (f && left ? ' · ' + fmt(left) : ''); h.append(em);
+          el.append(h);
+          if (f) return;
+          arr.forEach(i => {
+            const r = document.createElement('button');
+            r.type = 'button'; r.className = 'dm-row' + (i.by ? ' on' : ''); r.dataset.id = i.id;
+            r.setAttribute('aria-pressed', String(!!i.by));
+            r.innerHTML = '<span class="dm-tick"></span><span class="dm-n"></span><span class="dm-p"></span>';
+            r.querySelector('.dm-n').textContent = i.n;
+            r.querySelector('.dm-p').textContent = i.p ? fmt(i.p) : 'بدون قیمت';
+            if (i.by) { const w = document.createElement('span'); w.className = 'dm-who'; w.style.setProperty('--wc', i.by === 'sara' ? SARA : ME); w.textContent = i.by === 'sara' ? 'س' : 'ش'; r.append(w); }
+            el.append(r);
+          });
+        });
+        const f = document.createElement('form'); f.className = 'dm-add'; f.autocomplete = 'off';
+        f.innerHTML = '<input type="text" maxlength="30" placeholder="کالای جدید… مثلاً نان" aria-label="کالای جدید"><button type="submit">افزودن</button>';
+        el.append(f);
+      }
+      function drawChat() {
+        const el = $('dmChat');
+        el.innerHTML = '<div class="dm-chat"></div><form class="dm-add" autocomplete="off"><input type="text" maxlength="80" placeholder="پیام برای سارا…" aria-label="پیام"><button type="submit">ارسال</button></form>';
+        const box = el.firstChild;
+        chat.forEach(m => { const d = document.createElement('div'); d.className = 'dm-msg' + (m.who === 'me' ? ' me' : ''); if (m.who === 'sara') { const b = document.createElement('b'); b.style.setProperty('--wc', SARA); b.textContent = 'سارا'; d.append(b); } d.append(m.t); box.append(d); });
+        el.scrollTop = el.scrollHeight;
+      }
+      function drawRep() {
+        const el = $('dmRep'), spent = items.filter(i => i.by);
+        if (!spent.length) { el.innerHTML = '<p class="dm-empty">هنوز خریدی ثبت نشده.<br>چند کالا را در تب «لیست» بزنید تا گزارش خرج بسازد.</p>'; return; }
+        const tot = spent.reduce((t, i) => t + i.p, 0) || 1;
+        const rows = [];
+        SH.concat([{ n: 'متفرقه', c: 'var(--c5)' }]).forEach((s, si) => { const v = spent.filter(i => i.sh === si).reduce((t, i) => t + i.p, 0); if (v) rows.push([s.n, v, s.c]); });
+        rows.push(null);
+        [['شما', 'me', ME], ['سارا', 'sara', SARA]].forEach(([n, k, c]) => { const v = spent.filter(i => i.by === k).reduce((t, i) => t + i.p, 0); if (v) rows.push([n, v, c, true]); });
+        el.textContent = '';
+        const title = (t) => { const h = document.createElement('p'); h.className = 'dm-sh'; h.style.margin = '10px 0 0'; h.textContent = t; return h; };
+        el.append(title('خرج به تفکیک قفسه'));
+        rows.forEach(r => {
+          if (!r) { el.append(title('خرج به تفکیک خریدار')); return; }
+          const d = document.createElement('div'); d.className = 'dm-rb'; d.style.setProperty('--sc', r[2]);
+          d.innerHTML = '<div><span></span><b></b></div><p class="tr"><i></i></p>';
+          d.querySelector('span').textContent = r[0]; d.querySelector('b').textContent = fmt(r[1]);
+          d.querySelector('i').style.width = Math.max(4, r[1] / tot * 100) + '%';
+          d.querySelector('.tr').style.margin = '0';
+          el.append(d);
+        });
+      }
+      function drawTotals() {
+        const done = items.filter(i => i.by), spent = done.reduce((t, i) => t + i.p, 0), left = items.filter(i => !i.by).reduce((t, i) => t + i.p, 0);
+        $('dmSpent').textContent = fmt(spent); $('dmLeft').textContent = fmt(left);
+        $('dmProg').textContent = fmt(done.length) + ' از ' + fmt(items.length);
+        $('dmFill').style.width = (items.length ? done.length / items.length * 100 : 0) + '%';
+      }
+      function draw() {
+        drawTotals();
+        root.querySelectorAll('.dm-tabs button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.tab === tab)));
+        $('dmList').hidden = tab !== 'list'; $('dmChat').hidden = tab !== 'chat'; $('dmRep').hidden = tab !== 'rep';
+        const b = $('dmBadge'); b.hidden = !unread; b.textContent = fmt(unread);
+        if (tab === 'list') drawList(); else if (tab === 'chat') drawChat(); else drawRep();
+        hint(['👆 روی یک کالا بزنید تا خریده شود', 'حالا ببینید «سارا» هم از جای دیگر می‌خرد…', 'به تب «گفتگو» بروید و پیام بدهید', 'تب «گزارش» خرج را خودکار حساب می‌کند'][Math.min(hintStep, 3)]);
+      }
+      function partnerBuys() {
+        if (partnerDone) return; partnerDone = true;
+        partnerT = setTimeout(() => {
+          const it = items.find(i => i.n === 'خیار' && !i.by) || items.find(i => !i.by);
+          if (!it) return;
+          it.by = 'sara'; say('سارا «' + it.n + '» را خرید ✓');
+          if (hintStep < 2) hintStep = 2;
+          draw(); const r = $d('[data-id="' + it.id + '"]'); if (r) r.classList.add('pop');
+        }, 4200);
+      }
+      root.addEventListener('click', e => {
+        const t = e.target.closest('.dm-tabs button');
+        if (t) { tab = t.dataset.tab; if (tab === 'chat') unread = 0; if (tab === 'chat' && hintStep < 3) hintStep = 3; draw(); return; }
+        const fh = e.target.closest('[data-fold]');
+        if (fh) { const k = Number(fh.dataset.fold); if (folded.has(k)) folded.delete(k); else folded.add(k); markUsed(); draw(); return; }
+        const row = e.target.closest('.dm-row');
+        if (row) {
+          const it = items[Number(row.dataset.id)]; if (!it) return;
+          it.by = it.by ? null : 'me'; markUsed();
+          if (it.by && hintStep < 1) hintStep = 1;
+          draw(); const r = $d('[data-id="' + it.id + '"]'); if (r) r.classList.add('pop');
+          if (it.by) partnerBuys();
+        }
+      });
+      root.addEventListener('submit', e => {
+        e.preventDefault();
+        const inp = e.target.querySelector('input'), v = inp.value.trim();
+        if (!v) return;
+        markUsed();
+        if (e.target.closest('#dmList')) { items.push({ id: items.length, n: v.slice(0, 30), p: 0, sh: 3, by: null }); inp.value = ''; draw(); say('«' + v.slice(0, 30) + '» اضافه شد'); return; }
+        chat.push({ who: 'me', t: v }); inp.value = ''; drawChat();
+        partnerT = setTimeout(() => { chat.push({ who: 'sara', t: REPLIES[ri++ % REPLIES.length] }); if (tab === 'chat') drawChat(); else { unread++; draw(); } if (hintStep < 3) { hintStep = 3; hint('تب «گزارش» خرج را خودکار حساب می‌کند'); } }, 1100);
+        root.querySelector('#dmChat input').focus();
+      });
+      reset();
+    })();
+
+    // ---------- Guided tour (interactive coach marks over the real screen) ----------
+    const TOUR_KEY = 'shop.tour';
+    const visible = el => !!el && el.getClientRects().length > 0 && !el.closest('[hidden]');
+    const TOUR_STEPS = [
+      { title: 'خوش آمدید 👋', text: 'در یک دقیقه کارهای اصلی را با هم امتحان می‌کنیم. هر وقت خواستید «رد کردن» را بزنید.' },
+      { sel: '#dock', wait: 'item_added', title: 'کالا اضافه کنید', text: 'اسم یک کالا را اینجا بنویسید (مثلاً «شیر») و دکمه افزودن را بزنید. با تایپ، پیشنهاد می‌آید.' },
+      { sel: '#todoBody .row', wait: 'item_bought', title: 'خرید را ثبت کنید', text: 'روی کالا بزنید تا باز شود، قیمت را بنویسید و «ثبت خرید» را بزنید. قیمت‌ها یادآوری می‌شوند.' },
+      { sel: '.shelf-toggle', title: 'قفسه‌ها', text: 'کالاها بر اساس قفسه گروه‌بندی می‌شوند. اسم قفسه را لمس کنید تا جمع شود و فقط خلاصه‌اش را ببینید.' },
+      { sel: '#chatBtn', title: 'گفتگو', text: 'چیزهایی که در لیست نمی‌گنجد، مثل «این برند نبود»، را برای اعضای لیست بنویسید.' },
+      { sel: '#repBtn', title: 'تاریخچه و گزارش', text: 'بعد از «پایان خرید»، هر سفر خرید ذخیره می‌شود. در «گزارش» می‌بینید ماه به ماه پول کجا رفته.' },
+      { sel: '#endBtn', title: 'پایان خرید', text: 'وقتی خرید تمام شد، این دکمه لیست را برای دفعه بعد خالی می‌کند. اگر اشتباه شد، برگرداندن ممکن است.' },
+      { sel: '#listBtn', title: 'دعوت و لیست‌ها', text: 'از اینجا لیست‌های دیگر بسازید، اعضا را با لینک دعوت کنید و به «حساب کاربری» بروید. تمام! اگر نظری دارید از همان‌جا «ارسال بازخورد» را بزنید.' },
+    ];
+    let tour = null;
+    const tEl = id => document.getElementById(id);
+    function tourBlock(ids, rect) {
+      const W = innerWidth, H = innerHeight, set = (id, x, y, w, h) => { const b = tEl(id); b.style.cssText = `left:${x}px;top:${y}px;width:${Math.max(0, w)}px;height:${Math.max(0, h)}px`; };
+      if (!rect) { set('tb1', 0, 0, W, H); ['tb2', 'tb3', 'tb4', 'tb5'].forEach(i => set(i, 0, 0, 0, 0)); return; }
+      set('tb1', 0, 0, W, rect.y); set('tb2', 0, rect.y + rect.h, W, H - rect.y - rect.h);
+      set('tb3', 0, rect.y, rect.x, rect.h); set('tb4', rect.x + rect.w, rect.y, W - rect.x - rect.w, rect.h);
+      if (ids.lock) set('tb5', rect.x, rect.y, rect.w, rect.h); else set('tb5', 0, 0, 0, 0);
+    }
+    function tourPlace() {
+      if (!tour) return;
+      const st = TOUR_STEPS[tour.i], card = tEl('tcard'), ring = tEl('tring');
+      const el = st.sel ? document.querySelector(st.sel) : null;
+      if (!el || !visible(el)) { ring.hidden = true; tourBlock({ lock: true }, null); card.style.top = Math.max(40, innerHeight / 2 - card.offsetHeight / 2) + 'px'; card.style.bottom = 'auto'; return; }
+      const r = el.getBoundingClientRect(), pad = 6;
+      const rect = { x: Math.max(0, r.left - pad), y: Math.max(0, r.top - pad), w: Math.min(innerWidth, r.width + pad * 2), h: r.height + pad * 2 };
+      ring.hidden = false; ring.style.cssText = `left:${rect.x}px;top:${rect.y}px;width:${rect.w}px;height:${rect.h}px`;
+      tourBlock({ lock: !st.wait }, rect);
+      if (rect.y + rect.h / 2 > innerHeight * 0.5) { card.style.top = 'auto'; card.style.bottom = Math.min(innerHeight - 120, innerHeight - rect.y + 12) + 'px'; }
+      else { card.style.bottom = 'auto'; card.style.top = Math.min(innerHeight - card.offsetHeight - 10, rect.y + rect.h + 12) + 'px'; }
+    }
+    function tourShow(i) {
+      const st = TOUR_STEPS[i];
+      if (st.sel && !visible(document.querySelector(st.sel))) { if (i < TOUR_STEPS.length - 1) return tourShow(i + 1); }
+      tour.i = i;
+      const el = st.sel ? document.querySelector(st.sel) : null;
+      if (el && el.scrollIntoView && el.closest('#todoBody, #tools')) el.scrollIntoView({ block: 'center', behavior: 'instant' in document.documentElement.style ? 'instant' : 'auto' });
+      tEl('tstep').textContent = `${fmt(i + 1)} از ${fmt(TOUR_STEPS.length)}`;
+      tEl('ttitle').textContent = st.title; tEl('ttext').textContent = st.text;
+      tEl('twait').hidden = !st.wait;
+      tEl('tnext').textContent = i === TOUR_STEPS.length - 1 ? 'پایان' : (st.wait ? 'رد شدن' : (i === 0 ? 'شروع' : 'بعدی'));
+      tEl('tour').hidden = false;
+      requestAnimationFrame(tourPlace);
+    }
+    function tourStart() {
+      document.querySelectorAll('dialog[open]').forEach(d => d.close());
+      tour = { i: 0 }; Track.event('tour_start');
+      tourShow(0);
+      tour.timer = setInterval(tourPlace, 350);
+    }
+    function tourEnd(done) {
+      if (!tour) return;
+      clearInterval(tour.timer); tour = null; tEl('tour').hidden = true;
+      lsSet(TOUR_KEY, done ? 'done' : 'skipped');
+      Track.event(done ? 'tour_done' : 'tour_skip');
+      if (done) toast('آموزش تمام شد. موفق باشید!');
+    }
+    function tourNext() { if (!tour) return; if (tour.i >= TOUR_STEPS.length - 1) tourEnd(true); else tourShow(tour.i + 1); }
+    function tourNotify(name) {
+      if (tour && TOUR_STEPS[tour.i].wait === name) { const at = tour.i; setTimeout(() => { if (tour && tour.i === at) tourNext(); }, 900); }
+    }
+    function maybeStartTour() {
+      if (lsGet(TOUR_KEY)) return;
+      const created = state.user && state.user.created_at ? Date.parse(state.user.created_at) : 0;
+      if (!created || Date.now() - created > 3 * 864e5) { lsSet(TOUR_KEY, 'existing-user'); return; }    // only brand-new accounts get it automatically
+      setTimeout(() => { if (!$('appRoot').hidden && !document.querySelector('dialog[open]') && !tour) tourStart(); }, 1500);
+    }
+    $('tnext').addEventListener('click', tourNext);
+    $('tskip').addEventListener('click', () => tourEnd(false));
+    addEventListener('resize', tourPlace);
+    $('tourBtn').addEventListener('click', () => { $('acctDlg').close(); setTimeout(tourStart, 250); });
+
+    // ---------- Feedback ----------
+    const APP_VERSION = '2026.10.20';
+    let fbKind = 'idea', fbRating = 0, fbLast = 0;
+    const FB_KIND = { idea: 'ایده', bug: 'مشکل', question: 'سؤال', thanks: 'تشکر' };
+    function fbDraw() {
+      document.querySelectorAll('#fbKinds button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.kind === fbKind)));
+      document.querySelectorAll('#fbStars button').forEach(b => b.classList.toggle('on', Number(b.dataset.n) <= fbRating));
+    }
+    function fbOpen() {
+      $('fbForm').hidden = false; $('fbThanks').hidden = true; $('fbNote').textContent = '';
+      $('fbText').value = ''; fbKind = 'idea'; fbRating = 0; fbDraw();
+      $('acctDlg').close(); $('fbDlg').showModal();
+    }
+    $('fbBtn').addEventListener('click', fbOpen);
+    $('fbClose').addEventListener('click', () => $('fbDlg').close());
+    $('fbDone').addEventListener('click', () => $('fbDlg').close());
+    $('fbDlg').addEventListener('click', e => { if (e.target === $('fbDlg')) $('fbDlg').close(); });
+    $('fbKinds').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { fbKind = b.dataset.kind; fbDraw(); } });
+    $('fbStars').addEventListener('click', e => { const b = e.target.closest('button'); if (b) { const n = Number(b.dataset.n); fbRating = fbRating === n ? 0 : n; fbDraw(); } });
+    $('fbSend').addEventListener('click', async () => {
+      const body = $('fbText').value.trim(), note = $('fbNote');
+      if (body.length < 3) { note.textContent = 'چند کلمه بنویسید.'; return; }
+      if (Date.now() - fbLast < 15000) { note.textContent = 'کمی صبر کنید و دوباره بفرستید.'; return; }
+      $('fbSend').disabled = true; note.textContent = '';
+      const meta = { v: APP_VERSION, standalone: isStandalone(), w: innerWidth, lang: navigator.language, ua: navigator.userAgent.slice(0, 140) };
+      const r = await db.from('feedback').insert([{ kind: fbKind, rating: fbRating || null, body, can_reply: $('fbReply').checked, meta }]);
+      $('fbSend').disabled = false;
+      if (r.error) {
+        note.textContent = (r.error.code === '42P01' || r.error.code === 'PGRST205') ? 'ابتدا فایل supabase-feedback-update.sql را اجرا کنید.'
+          : r.error.code === '42501' ? 'امروز به حد مجاز پیام رسیده‌اید. فردا دوباره بفرستید.' : 'ارسال نشد. دوباره تلاش کنید.';
+        return;
+      }
+      fbLast = Date.now(); Track.event('feedback_sent');
+      $('fbForm').hidden = true; $('fbThanks').hidden = false;
+    });
+    // Admin inbox
+    async function loadFeedbackAdmin() {
+      const box = $('fbAdminBody'); box.innerHTML = '<p class="hint">در حال بارگیری…</p>';
+      const r = await db.rpc('admin_feedback', { p_status: $('fbFilter').value });
+      if (r.error) { box.innerHTML = `<p class="hint">${isMissingFn(r.error) || /admin_feedback/.test(r.error.message || '') ? 'ابتدا فایل supabase-feedback-update.sql را اجرا کنید.' : 'دریافت نشد.'}</p>`; return; }
+      const rows = r.data || [];
+      if (!rows.length) { box.innerHTML = '<p class="rep-note">پیامی نیست.</p>'; return; }
+      const dt = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+      box.innerHTML = rows.map(f => `<div class="fbi"><b>${FB_KIND[f.kind] || esc(f.kind)}</b>${f.rating ? ' · ' + '★'.repeat(f.rating) : ''} <small>${dt.format(new Date(f.created_at))}</small>
+        <div dir="auto" style="white-space:pre-wrap">${esc(f.body)}</div>
+        <small>${f.name ? esc(f.name) + ' · ' : ''}${f.email ? `<a href="mailto:${esc(f.email)}">${esc(f.email)}</a>` : 'بدون اجازه پاسخ'}${f.meta ? ' · ' + (f.meta.standalone ? 'نصب‌شده' : 'مرورگر') + ' · ' + esc(f.meta.v || '') : ''}</small>
+        <div class="acts"><button class="btn" type="button" data-fbset="${f.id}" data-to="${f.status === 'done' ? 'new' : 'done'}">${f.status === 'done' ? 'بازگشایی' : 'انجام شد'}</button></div></div>`).join('');
+    }
+    $('fbAdminBody').addEventListener('click', async e => {
+      const b = e.target.closest('[data-fbset]');
+      if (!b) return;
+      const r = await db.rpc('admin_feedback_set', { p_id: Number(b.dataset.fbset), p_status: b.dataset.to });
+      if (r.error) toast('انجام نشد.', 'error'); else loadFeedbackAdmin();
+    });
+    $('fbFilter').addEventListener('change', loadFeedbackAdmin);
+
     // ---------- Install as an app + offline notice ----------
     let deferredInstall = null;
     const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
@@ -3972,8 +4380,8 @@ notify pgrst, 'reload schema';`;
     }
     const EVT = { landing_view: 'دیدن صفحه معرفی', signup: 'ثبت‌نام', login: 'ورود', app_open: 'باز کردن برنامه', item_added: 'افزودن کالا',
       item_bought: 'ثبت خرید کالا', trip_ended: 'پایان یک خرید', report_opened: 'دیدن گزارش', list_created: 'ساخت لیست جدید',
-      invite_created: 'ساخت لینک دعوت', invite_joined: 'پیوستن با دعوت', install_click: 'زدن دکمه نصب', chat_sent: 'ارسال پیام گفتگو', push_enabled: 'روشن کردن اعلان', pwa_installed: 'نصب برنامه', export_data: 'نسخه پشتیبان' };
-    const FUNNEL = ['landing_view', 'signup', 'app_open', 'item_added', 'item_bought', 'trip_ended', 'invite_created', 'invite_joined', 'chat_sent', 'push_enabled', 'install_click', 'pwa_installed'];
+      invite_created: 'ساخت لینک دعوت', invite_joined: 'پیوستن با دعوت', install_click: 'زدن دکمه نصب', chat_sent: 'ارسال پیام گفتگو', push_enabled: 'روشن کردن اعلان', demo_used: 'امتحان دموی صفحه اول', tour_start: 'شروع آموزش', tour_done: 'پایان آموزش', tour_skip: 'رد کردن آموزش', feedback_sent: 'ارسال بازخورد', pwa_installed: 'نصب برنامه', export_data: 'نسخه پشتیبان' };
+    const FUNNEL = ['landing_view', 'signup', 'app_open', 'item_added', 'item_bought', 'trip_ended', 'invite_created', 'invite_joined', 'demo_used', 'tour_done', 'feedback_sent', 'chat_sent', 'push_enabled', 'install_click', 'pwa_installed'];
     const dayFmt = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { month: 'short', day: 'numeric' });
     function daySeries(arr) {
       const rows = (arr || []).slice(-14), max = Math.max(1, ...rows.map(x => x.n));
@@ -4001,7 +4409,7 @@ notify pgrst, 'reload schema';`;
           ${barsHTML(FUNNEL.map(k => ({ label: EVT[k], val: fmt(f[k] || 0) + ' · ' + fmt(ev[k] || 0) + ' بار', pct: (f[k] || 0) / fmax * 100 })), 'saffron')}
           <p class="rep-note">عدد اول: چند دستگاه. عدد دوم: چند بار رخ داده.</p></section>`;
     }
-    $('adminOpen').addEventListener('click', () => { $('adminDlg').showModal(); loadAdmin(); });
+    $('adminOpen').addEventListener('click', () => { $('adminDlg').showModal(); loadAdmin(); loadFeedbackAdmin(); });
     $('admDays').addEventListener('change', loadAdmin);
     $('admClose').addEventListener('click', () => $('adminDlg').close());
     $('adminDlg').addEventListener('click', e => { if (e.target === $('adminDlg')) $('adminDlg').close(); });

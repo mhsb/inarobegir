@@ -43,6 +43,12 @@ button.p{background:var(--acc);color:var(--acc-fg);border-color:var(--acc)}
 button.s{font-size:12px;padding:1px 8px}
 .hint{color:var(--mut);font-size:13px;margin:8px 0 0}
 .cnt{font-size:14px;color:var(--mut)}
+.big{min-height:200px;resize:vertical;line-height:1.9}
+.mid{min-height:110px;resize:vertical;line-height:1.8}
+.chk{display:flex;gap:6px;align-items:center;font-size:14px}
+details{margin-top:12px}
+summary{cursor:pointer;color:var(--mut);font-size:14px}
+.row.miss{border-color:var(--warn)}
 .cnt.warn{color:var(--warn)}
 .row{display:grid;grid-template-columns:30px 1fr;gap:6px 10px;border:1px solid var(--bd);border-radius:10px;background:var(--card);padding:10px 12px;margin-bottom:12px}
 .num{grid-row:1/span 3;color:var(--mut);font-size:13px;padding-top:8px;text-align:center}
@@ -70,7 +76,7 @@ aside h2{font-size:16px;margin:0 0 10px}
 <body>
 <div class="wrap">
   <h1>بازبینی ترجمه</h1>
-  <p class="sub">متن فارسی و ترجمه‌ی انگلیسیِ هوش مصنوعی را بچسبانید تا پاراگراف به پاراگراف زیر هم بیایند. پاراگراف انگلیسی را همان‌جا ویرایش کنید تا ترجمه‌ی نهایی خودتان ساخته شود. همه‌چیز فقط در همین مرورگر ذخیره می‌شود.</p>
+  <p class="sub">پرامپت ترجمه را انتخاب کنید، متن فارسی را بگذارید و پرامپت کامل را برای هوش مصنوعی کپی کنید. جواب را که برگرداندید، اپ پاراگراف‌ها را شماره‌به‌شماره زیر هم می‌چیند و می‌توانید ترجمه‌ی انگلیسی را همان‌جا ویرایش کنید. همه‌چیز فقط در همین مرورگر ذخیره می‌شود.</p>
 
   <div class="layout">
     <main>
@@ -79,15 +85,33 @@ aside h2{font-size:16px;margin:0 0 10px}
         <input type="text" id="title" placeholder="مثلاً فصل ۳ – بند دوم">
       </div>
 
-      <section id="st-in" class="box">
-        <div class="two">
-          <div><label class="t" for="faIn">متن اصلی (فارسی)</label><textarea id="faIn" dir="rtl" lang="fa" placeholder="متن فارسی را اینجا بچسبانید"></textarea></div>
-          <div><label class="t" for="enIn">خروجی هوش مصنوعی (انگلیسی)</label><textarea id="enIn" dir="ltr" lang="en" placeholder="Paste the English translation here"></textarea></div>
+      <section id="st-in">
+        <div class="box">
+          <label class="t" for="pr">۱. پرامپت ترجمه</label>
+          <div class="bar" style="margin-top:0">
+            <label class="chk"><input type="radio" name="prm" id="pr-def"> پرامپت پیش‌فرض</label>
+            <label class="chk"><input type="radio" name="prm" id="pr-cus"> پرامپت خودم</label>
+          </div>
+          <textarea id="pr" class="mid" dir="auto" style="margin-top:8px"></textarea>
+          <p class="hint">این پرامپت بعداً با متن فارسی و دستور پاراگراف‌بندی ترکیب می‌شود. برای نوشتن پرامپت خودتان گزینه‌ی «پرامپت خودم» را بزنید.</p>
         </div>
-        <p class="hint">پاراگراف‌ها را با یک خط خالی از هم جدا کنید. اگر خط خالی نباشد، هر خط یک پاراگراف حساب می‌شود.</p>
-        <div class="bar">
-          <button class="p" id="align">چیدن پاراگراف به پاراگراف</button>
-          <button id="newb0">پاک‌کردن</button>
+        <div class="box">
+          <label class="t" for="faIn">۲. متن اصلی (فارسی) <span class="cnt" id="fcnt"></span></label>
+          <textarea id="faIn" class="big" dir="rtl" lang="fa" placeholder="متن فارسی را اینجا بچسبانید؛ پاراگراف‌ها را با خط خالی جدا کنید"></textarea>
+          <div class="bar"><button class="p" id="copyprompt">کپی پرامپت کامل برای هوش مصنوعی</button></div>
+          <p class="hint">پرامپت را به هوش مصنوعی بدهید و جوابش را در کادر بعدی بچسبانید.</p>
+          <details>
+            <summary>تنظیمات پیشرفته: مشاهده‌ی پرامپت کامل</summary>
+            <textarea id="full" class="mid" readonly dir="auto" style="margin-top:8px;min-height:180px"></textarea>
+          </details>
+        </div>
+        <div class="box">
+          <label class="t" for="enIn">۳. خروجی هوش مصنوعی (انگلیسی)</label>
+          <textarea id="enIn" class="big" dir="ltr" lang="en" placeholder="Paste the AI's answer here"></textarea>
+          <div class="bar">
+            <button class="p" id="align">چیدن پاراگراف به پاراگراف</button>
+            <button id="newb0">پاک‌کردن</button>
+          </div>
         </div>
       </section>
 
@@ -233,18 +257,24 @@ function drawDiff(){
 /* ---- review rows ---- */
 function autoH(t){t.style.height='auto';t.style.height=(t.scrollHeight+2)+'px'}
 function status(){
-  var f=S.fa.length,e=S.en.length,el=$('#cnt');
-  var last=-1;S.en.forEach(function(x,i){if(x.trim())last=i});e=last+1;
-  var ok=f===e;
+  var f=S.fa.length,el=$('#cnt'),miss=[],extra=0,i,t='';
+  for(i=0;i<f;i++)if(!(S.en[i]||'').trim())miss.push(i+1);
+  for(i=f;i<S.en.length;i++)if((S.en[i]||'').trim())extra++;
+  var ok=!miss.length&&!extra;
   el.className='cnt'+(ok?'':' warn');
-  el.textContent=ok?('همه‌ی '+nf(f)+' پاراگراف هم‌تراز است.')
-    :('فارسی: '+nf(f)+' پاراگراف · انگلیسی: '+nf(e)+' پاراگراف. با دکمه‌های هر ردیف (درج خالی، حذف، ادغام، شکستن) هم‌ترازشان کنید.');
+  if(ok)t='همه‌ی '+nf(f)+' پاراگراف ترجمه دارند و هم‌ترازند.';
+  else{
+    if(miss.length)t+='بدون ترجمه: '+miss.slice(0,10).map(function(x){return nf(x)}).join('، ')+(miss.length>10?' و …':'')+'. ';
+    if(extra)t+=nf(extra)+' پاراگراف انگلیسی اضافه است. ';
+    t+='با دکمه‌های هر ردیف هم‌ترازشان کنید.';
+  }
+  el.textContent=t;
 }
 function drawRows(){
   var n=Math.max(S.fa.length,S.en.length),h='';
   for(var i=0;i<n;i++){
     var f=S.fa[i];
-    h+='<div class="row"><div class="num">'+nf(i+1)+'</div>'+
+    h+='<div class="row'+((f!=null&&!(S.en[i]||'').trim())?' miss':'')+'"><div class="num">'+nf(i+1)+'</div>'+
       '<div class="fa" dir="rtl" lang="fa">'+(f==null?'<span class="mut">(پاراگراف فارسی متناظر ندارد)</span>':esc(f))+'</div>'+
       '<textarea class="en" dir="ltr" lang="en" spellcheck="true" data-i="'+i+'" aria-label="ترجمه‌ی انگلیسی پاراگراف '+(i+1)+'" placeholder="English translation">'+esc(S.en[i]||'')+'</textarea>'+
       '<div class="rb">'+
@@ -279,29 +309,76 @@ $('#rows').addEventListener('click',function(ev){
 });
 
 /* ---- stages ---- */
+var DEF='تو یک مترجم حرفه‌ای هستی. متن فارسی زیر را به انگلیسیِ روان، دقیق و طبیعی ترجمه کن. لحن و سبک متن اصلی را حفظ کن، چیزی اضافه یا کم نکن و نام‌ها، اعداد و اصطلاحات تخصصی را با دقت منتقل کن.';
+var PR={mode:'default',custom:''};
+try{var px=JSON.parse(localStorage.getItem('trev_prompt_v1')||'null');if(px&&(px.mode==='custom'||px.mode==='default')){PR.mode=px.mode;PR.custom=String(px.custom||'')}}catch(e){}
+function savePr(){try{localStorage.setItem('trev_prompt_v1',JSON.stringify(PR))}catch(e){}}
+function curPrompt(){var p=PR.mode==='custom'?PR.custom.trim():DEF;return p||DEF}
+function buildPrompt(){
+  var fa=split($('#faIn').value);if(!fa.length)return '';
+  var r='قواعد قالب‌بندی خروجی (حتماً رعایت کن):\n'+
+    '- متن فارسی زیر به '+fa.length+' پاراگراف شماره‌دار تقسیم شده است.\n'+
+    '- هر پاراگراف را جداگانه ترجمه کن و خروجی را دقیقاً با همان شماره‌ها برگردان: شماره‌ی هر پاراگراف را در یک خط جدا به شکل [1] بنویس و ترجمه‌اش را در خط بعد بگذار.\n'+
+    '- ترتیب را تغییر نده و هیچ پاراگرافی را حذف، ادغام یا تقسیم نکن.\n'+
+    '- بیرون از ترجمه‌ها هیچ مقدمه، توضیح یا یادداشتی ننویس.\n\n'+
+    'متن فارسی:\n\n'+fa.map(function(p,i){return '['+(i+1)+']\n'+p}).join('\n\n');
+  return curPrompt()+'\n\n---\n'+r;
+}
+function updFa(){
+  var n=split($('#faIn').value).length;
+  $('#fcnt').textContent=n?'('+nf(n)+' پاراگراف)':'';
+  $('#full').value=buildPrompt();
+}
+function syncPr(){
+  $('#pr-def').checked=PR.mode==='default';$('#pr-cus').checked=PR.mode==='custom';
+  var t=$('#pr');t.readOnly=PR.mode==='default';t.value=PR.mode==='default'?DEF:PR.custom;
+  updFa();
+}
+$('#pr-def').onchange=function(){PR.mode='default';savePr();syncPr()};
+$('#pr-cus').onchange=function(){PR.mode='custom';if(!PR.custom.trim())PR.custom=DEF;savePr();syncPr()};
+$('#pr').addEventListener('input',function(){if(PR.mode==='custom'){PR.custom=this.value;savePr();updFa()}});
+$('#copyprompt').onclick=function(){var p=buildPrompt();if(!p){toast('اول متن فارسی را وارد کنید');return}copy(p,'پرامپت کامل کپی شد')};
+
 function show(){
   $('#st-in').hidden=S.stage!=='input';$('#st-rv').hidden=S.stage!=='review';
   $('#faIn').value=S.faIn;$('#enIn').value=S.enIn;$('#title').value=S.title;
   $('#update').hidden=!S.cur;
+  syncPr();
   if(S.stage==='review')drawRows();
   drawHist();
 }
+function parseNumbered(text,n){
+  var re=/^[ \t>*_#-]*\[(\d{1,4})\][ \t*_]*:?[ \t]*/gm,m,marks=[],i;
+  while((m=re.exec(text))){marks.push({n:+m[1],s:m.index,e:re.lastIndex})}
+  if(!marks.length)return null;
+  var en=[],extra=0;for(i=0;i<n;i++)en.push('');
+  marks.forEach(function(k,j){
+    var end=j+1<marks.length?marks[j+1].s:text.length,t=text.slice(k.e,end).trim(),x=k.n-1;
+    if(x<0||x>=n){if(t)extra++;return}
+    en[x]=en[x]?en[x]+'\n\n'+t:t;
+  });
+  return{en:en,extra:extra};
+}
 $('#align').onclick=function(){
-  var fa=split($('#faIn').value),en=split($('#enIn').value);
-  if(!fa.length||!en.length){toast('هر دو متن را وارد کنید');return}
-  S.fa=fa;S.en=en;if(!S.keepAi)S.ai=en.join('\n\n');
+  var fa=split($('#faIn').value),raw=$('#enIn').value;
+  if(!fa.length||!raw.trim()){toast('متن فارسی و خروجی هوش مصنوعی را وارد کنید');return}
+  var p=parseNumbered(raw,fa.length),en;
+  if(p){en=p.en;if(p.extra)toast(nf(p.extra)+' پاراگراف با شماره‌ی نامعتبر نادیده گرفته شد')}
+  else{en=split(raw);toast('شماره‌ای در خروجی پیدا نشد؛ بر اساس ترتیب چیده شد')}
+  S.faIn=$('#faIn').value;S.enIn=raw;S.fa=fa;S.en=en;
+  if(!S.keepAi)S.ai=nonEmpty(en).join('\n\n');
   S.keepAi=false;S.stage='review';saveDraft();show();
   window.scrollTo({top:0,behavior:'smooth'});
 };
 $('#back').onclick=function(){
-  S.faIn=S.fa.join('\n\n');S.enIn=finalText();S.keepAi=true;S.stage='input';saveDraft();show();
+  S.faIn=S.fa.join('\n\n');S.enIn=S.fa.map(function(x,i){return '['+(i+1)+']\n'+(S.en[i]||'')}).join('\n\n');S.keepAi=true;S.stage='input';saveDraft();show();
 };
 function reset(){
   if((S.faIn||S.enIn||S.fa.length)&&!confirm('متن فعلی از صفحه پاک شود؟ (موارد ذخیره‌شده در تاریخچه می‌مانند)'))return;
   S=fresh();saveDraft();show();
 }
 $('#newb').onclick=reset;$('#newb0').onclick=reset;
-$('#faIn').addEventListener('input',function(){S.faIn=this.value;dirty()});
+$('#faIn').addEventListener('input',function(){S.faIn=this.value;updFa();dirty()});
 $('#enIn').addEventListener('input',function(){S.enIn=this.value;S.keepAi=false;dirty()});
 $('#title').addEventListener('input',function(){S.title=this.value;dirty()});
 $('#tgdiff').onclick=function(){

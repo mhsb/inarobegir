@@ -522,6 +522,46 @@ create table if not exists price_history (
     .fbi small { color: var(--muted); }
     .fbi .acts { display: flex; gap: 8px; margin-top: 6px; }
 
+    /* ---------- Paper mode (simple writing view) ---------- */
+    .paper-open { flex: none; width: 44px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); color: var(--accent); display: grid; place-items: center; cursor: pointer; }
+    .paper-open svg { width: 22px; height: 22px; }
+    dialog.paper { position: fixed; inset: 0 0 auto 0; margin: 0; width: 100%; max-width: none; height: 100dvh; max-height: none; border: 0; padding: 0; color: var(--ink);
+      --pp: #fffcf0; --pp-line: #d6dff0; --pp-margin: #e9a5a5; --lh: 48px; background: var(--pp); }
+    @media (prefers-color-scheme: dark) { dialog.paper { --pp: #1d1f36; --pp-line: #2d3158; --pp-margin: #7b4a63; } }
+    dialog.paper::backdrop { background: transparent; }
+    .paper-in { display: flex; flex-direction: column; height: 100%; }
+    .paper-head { display: flex; align-items: center; gap: 10px; padding: 10px 14px; padding-top: calc(10px + env(safe-area-inset-top)); border-bottom: 2px solid var(--pp-line); }
+    .paper-head b { font-size: 18px; flex: 1; }
+    .paper-head span { font-size: 13px; color: var(--muted); }
+    .paper-tip { margin: 0; padding: 8px 14px; font-size: 13.5px; line-height: 1.9; background: color-mix(in srgb, var(--saffron) 18%, transparent); }
+    .paper-tip[hidden] { display: none; }
+    .paper-sheet { position: relative; flex: 1; overflow-y: auto; overscroll-behavior: contain; padding-bottom: 12px;
+      background-image: repeating-linear-gradient(to bottom, transparent 0, transparent calc(var(--lh) - 2px), var(--pp-line) calc(var(--lh) - 2px), var(--pp-line) var(--lh)); background-attachment: local; }
+    .paper-sheet::before { content: ""; position: absolute; inset-block: 0; inset-inline-start: 46px; width: 2px; background: var(--pp-margin); pointer-events: none; }
+    .paper-lines { list-style: none; margin: 0; padding: 0; }
+    .pl { position: relative; display: flex; align-items: center; gap: 8px; min-height: var(--lh); padding-inline: 58px 12px; font-size: 17px; line-height: 1.4; }
+    .pl .pl-no { position: absolute; inset-inline-start: 0; width: 44px; text-align: center; font-size: 12px; color: var(--muted); }
+    .pl .pl-t { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .pl .pl-q { flex: none; font-weight: 700; color: var(--accent); }
+    .pl .pl-p { flex: none; font-size: 12px; color: var(--muted); opacity: .75; }
+    .pl.saving .pl-t { opacity: .55; }
+    .pl.err .pl-t { color: var(--danger); }
+    .pl.edit { flex-wrap: wrap; align-content: center; min-height: calc(var(--lh) * 2); }
+    .pl-ed { display: flex; gap: 8px; align-items: center; width: 100%; }
+    .pl-ed label { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--muted); }
+    .pl-ed .btn { min-height: 36px; padding: 0 12px; }
+    .pl input { font: inherit; font-size: 17px; color: inherit; background: transparent; border: 0; outline: 0; min-width: 0; }
+    .pl.cur input.pl-name { flex: 1; height: calc(var(--lh) - 4px); }
+    .pl input.pl-qty { width: 58px; height: 36px; text-align: center; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+    .pl input.pl-qty[hidden] { display: none; }
+    .pl-qbtn { flex: none; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--muted); font: inherit; font-size: 16px; cursor: pointer; }
+    .pl-note { padding-inline: 58px 12px; min-height: 22px; font-size: 12.5px; color: var(--accent); }
+    .paper-bar { display: flex; gap: 8px; align-items: center; padding: 8px 10px calc(8px + env(safe-area-inset-bottom)); border-top: 2px solid var(--pp-line); background: var(--pp); }
+    .pchips { flex: 1; display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; min-height: 40px; align-items: center; }
+    .pchips::-webkit-scrollbar { display: none; }
+    .pchip { flex: none; min-height: 38px; padding: 0 14px; border: 1px solid var(--line); border-radius: 19px; background: var(--surface); color: var(--ink); font: inherit; font-size: 15px; cursor: pointer; }
+    .paper-bar .btn { flex: none; min-height: 44px; padding: 0 16px; }
+
     /* ---------- Installed-app polish ---------- */
     html { -webkit-tap-highlight-color: transparent; }
     button, .btn, .row, select, summary { touch-action: manipulation; -webkit-touch-callout: none; }
@@ -980,6 +1020,9 @@ create table if not exists price_history (
           <select class="field shelf-select" id="itemShelf" aria-label="قفسه"></select>
         </div>
         <div class="line">
+          <button class="paper-open" id="paperOpen" type="button" aria-label="نوشتن لیست روی کاغذ" title="نوشتن لیست روی کاغذ">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4L19 9a2.1 2.1 0 0 0-3-3L5 17v3z"/><path d="M14 7l3 3"/></svg>
+          </button>
           <input class="field" id="itemName" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="sugg"
                  placeholder="نام کالا را بنویسید…" aria-label="نام کالا" enterkeyhint="done" autocapitalize="off">
           <button class="add-btn" id="addBtn" type="submit" aria-label="افزودن به لیست" disabled>
@@ -1132,6 +1175,31 @@ create table if not exists price_history (
       <div id="fbThanks" hidden>
         <p class="dm-empty">ممنون! پیام شما ثبت شد.</p>
         <button class="btn btn-primary" id="fbDone" type="button" style="width:100%">بستن</button>
+      </div>
+    </div>
+  </dialog>
+
+  <dialog class="paper" id="paperDlg" aria-label="نوشتن لیست روی کاغذ">
+    <div class="paper-in">
+      <div class="paper-head">
+        <b>لیست خرید</b><span id="paperCount"></span>
+        <button class="btn btn-primary" id="paperDone" type="button">تمام</button>
+      </div>
+      <p class="paper-tip" id="paperTip" hidden>هر کالا را بنویسید و «بعدی» (یا Enter) را بزنید. برای تعداد بیشتر از ۱، بعد از اسم عدد بنویسید: <b>شیر ۲</b></p>
+      <div class="paper-sheet" id="paperSheet">
+        <ol class="paper-lines" id="paperLines"></ol>
+        <div class="pl cur" id="paperCur">
+          <span class="pl-no" id="paperNo"></span>
+          <input class="pl-name" id="paperName" type="text" enterkeyhint="next" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="نام کالا…" aria-label="کالای بعدی">
+          <span class="pl-q" id="paperHint"></span>
+          <input class="pl-qty" id="paperQty" inputmode="decimal" enterkeyhint="done" placeholder="تعداد" aria-label="تعداد" hidden>
+          <button class="pl-qbtn" id="paperQtyBtn" type="button" aria-label="تعداد بیشتر از ۱">×</button>
+        </div>
+        <div class="pl-note" id="paperNote" role="status"></div>
+      </div>
+      <div class="paper-bar">
+        <div class="pchips" id="paperChips" aria-label="پیشنهاد"></div>
+        <button class="btn btn-primary" id="paperNext" type="button">بعدی ✓</button>
       </div>
     </div>
   </dialog>
@@ -2323,6 +2391,7 @@ notify pgrst, 'reload schema';`;
 
     // Wrapper keeps keyboard focus on a drag handle across re-renders.
     function render() {
+      if ($('paperDlg').open) paperRender();
       const a = document.activeElement;
       const keep = a && a.classList && a.classList.contains('grip') ? a.closest('.row').dataset.id : null;
       renderInner();
@@ -2508,7 +2577,7 @@ notify pgrst, 'reload schema';`;
     }
 
     // Single entry point for every way of adding an item to the current session.
-    async function addToList(name, qty, price, shelf) {
+    async function addToList(name, qty, price, shelf, quiet) {
       const existing = findByName(name);
 
       if (existing && existing.in_list) {
@@ -2537,7 +2606,7 @@ notify pgrst, 'reload schema';`;
             .select().single());
           if (created && p > 0) ok(await db.from('price_history').insert([{ list_id: state.listId, item_id: created.id, price: p }]));
         }
-      }, 'به لیست اضافه شد.').then(r => { if (r) { Track.event('item_added'); if (foldSet().delete(shelf || '')) { saveFold(); render(); } } return r; });
+      }, quiet ? undefined : 'به لیست اضافه شد.').then(r => { if (r) { Track.event('item_added'); if (foldSet().delete(shelf || '')) { saveFold(); render(); } } return r; });
     }
 
     async function addByName(raw) {
@@ -4246,6 +4315,163 @@ notify pgrst, 'reload schema';`;
     });
     $('fbFilter').addEventListener('change', loadFeedbackAdmin);
 
+    // ---------- Paper mode: a calmer way to write a list ----------
+    const paper = { q: Promise.resolve(), pending: [], mine: [], editing: null, seq: 0, noteT: null };
+    const PAPER_TIP = 'shop.paperTip';
+    function paperItems() {
+      return state.items.filter(i => i.in_list && !i.is_checked)
+        .sort((a, b) => (Number(a.sort_order) || 0) - (Number(b.sort_order) || 0) || byName(a, b));
+    }
+    // "شیر ۲" or "شیر x2" -> name + quantity. Only a trailing number counts.
+    function splitQty(raw) {
+      const m = String(raw).trim().match(/^(.*\S)\s+[×xX*]?\s*([0-9۰-۹٠-٩]+(?:[.٫][0-9۰-۹٠-٩]+)?)$/);
+      if (!m) return null;
+      const q = parseNum(m[2]);
+      return q > 0 && q <= 999 ? { name: m[1].trim(), qty: round3(q) } : null;
+    }
+    function paperNote(t) {
+      $('paperNote').textContent = t || '';
+      clearTimeout(paper.noteT);
+      if (t) paper.noteT = setTimeout(() => { $('paperNote').textContent = ''; }, 2800);
+    }
+    function paperRender() {
+      const items = paperItems(), have = new Set(items.map(i => normName(i.name)));
+      const pend = paper.pending.filter(p => p.status === 'error' || !have.has(normName(p.name)));
+      let n = 0, html = '';
+      items.forEach(i => {
+        n++;
+        const p = Number(i.last_price) || 0, q = Number(i.quantity) || 1;
+        if (paper.editing === i.id) {
+          html += `<li class="pl edit" data-id="${i.id}"><span class="pl-no">${fmt(n)}</span><span class="pl-t">${esc(i.name)}</span>
+            <div class="pl-ed"><label>تعداد <input class="pl-qty" inputmode="decimal" data-pq="${i.id}" value="${fmt(q)}" aria-label="تعداد"></label>
+            <button class="btn" type="button" data-pdel="${i.id}">حذف</button><button class="btn btn-primary" type="button" data-pok>باشه</button></div></li>`;
+        } else {
+          html += `<li class="pl" data-id="${i.id}"><span class="pl-no">${fmt(n)}</span><span class="pl-t">${esc(i.name)}</span>${q !== 1 ? `<span class="pl-q">× ${fmt(q)}</span>` : ''}${p > 0 ? `<span class="pl-p">${fmt(p)}</span>` : ''}</li>`;
+        }
+      });
+      pend.forEach(p => {
+        n++;
+        html += `<li class="pl ${p.status === 'error' ? 'err' : 'saving'}" data-pend="${p.id}"><span class="pl-no">${fmt(n)}</span><span class="pl-t">${esc(p.name)}${p.status === 'error' ? ' — ذخیره نشد؛ لمس کنید تا دوباره امتحان شود' : ''}</span>${p.qty !== 1 ? `<span class="pl-q">× ${fmt(p.qty)}</span>` : ''}</li>`;
+      });
+      $('paperLines').innerHTML = html;
+      $('paperNo').textContent = fmt(n + 1);
+      $('paperCount').textContent = n ? fmt(n) + ' کالا' : '';
+      paperChips();
+    }
+    function paperScroll() { const s = $('paperSheet'); s.scrollTop = s.scrollHeight; }
+    function paperChips() {
+      const raw = $('paperName').value, sp = splitQty(raw), text = sp ? sp.name : raw;
+      let list;
+      if (normName(text)) list = suggestions(text).filter(i => !(i.in_list && !i.is_checked));
+      else list = state.items.filter(i => !i.in_list).sort((a, b) => freq(b) - freq(a) || byName(a, b)).slice(0, 10);
+      $('paperChips').innerHTML = list.map(i => `<button class="pchip" type="button" data-cid="${i.id}">${esc(i.name)}</button>`).join('');
+      $('paperHint').textContent = sp ? '× ' + fmt(sp.qty) : '';
+    }
+    function paperCommit(raw, qtyField) {
+      const text = String(raw).trim().replace(/\s+/g, ' ');
+      if (!text) return;
+      let name = text, qty = 1;
+      const sp = splitQty(text);
+      if (sp) { name = sp.name; qty = sp.qty; }
+      if (qtyField > 0) qty = round3(qtyField);
+      const ex = findByName(name);
+      if (ex && ex.in_list && !ex.is_checked) { paperNote('«' + ex.name + '» از قبل در لیست است.'); return; }
+      const job = { id: ++paper.seq, name: ex ? ex.name : name, qty, status: 'saving' };
+      paper.pending.push(job);
+      paperRender(); paperScroll();
+      try { localStorage.setItem(PAPER_TIP, '1'); } catch (e) { /* ignore */ }
+      $('paperTip').hidden = true;
+      paper.q = paper.q.then(async () => {
+        const done = await addToList(job.name, qty, NaN, ex ? null : guessShelf(name), true);
+        if (done) {
+          paper.pending = paper.pending.filter(p => p !== job);
+          const it = findByName(job.name); if (it) paper.mine.push(it.id);
+        } else job.status = 'error';
+      }).catch(() => { job.status = 'error'; }).then(() => { if ($('paperDlg').open) paperRender(); });
+    }
+    function paperSubmit() {
+      const nm = $('paperName'), qf = $('paperQty');
+      if (!nm.value.trim()) { if (!qf.hidden) { qf.hidden = true; qf.value = ''; } nm.focus(); return; }
+      paperCommit(nm.value, qf.hidden ? 0 : parseNum(qf.value));
+      nm.value = ''; qf.value = ''; qf.hidden = true;
+      paperChips(); nm.focus();
+    }
+    async function paperPullBack() {         // Backspace on an empty line: take the last line you wrote back for editing
+      let it = null;
+      while (paper.mine.length) { const c = findItem(paper.mine.pop()); if (c && c.in_list && !c.is_checked) { it = c; break; } }
+      if (!it) return;
+      const q = Number(it.quantity) || 1;
+      $('paperName').value = it.name + (q !== 1 ? ' ' + fmt(q) : '');
+      paperChips();
+      await mutate(async () => { ok(await db.from('items').update({ in_list: false, is_checked: false, updated_at: nowISO() }).eq('id', it.id)); });
+      paperRender();
+    }
+    function paperFit() {
+      const vv = window.visualViewport, d = $('paperDlg');
+      if (!vv) return;
+      d.style.height = vv.height + 'px'; d.style.top = vv.offsetTop + 'px';
+      if (d.open) paperScroll();
+    }
+    function paperOpen() {
+      paper.pending = paper.pending.filter(p => p.status === 'error'); paper.mine = []; paper.editing = null;
+      let seen = false; try { seen = !!localStorage.getItem(PAPER_TIP); } catch (e) { /* ignore */ }
+      $('paperTip').hidden = seen;
+      $('paperDlg').showModal(); paperRender(); paperFit(); paperScroll();
+      $('paperName').focus();
+      Track.event('paper_open');
+    }
+    function paperClose() {
+      if ($('paperName').value.trim()) paperSubmit();
+      $('paperDlg').close();
+    }
+    $('paperOpen').addEventListener('click', paperOpen);
+    $('paperDone').addEventListener('click', paperClose);
+    $('paperDlg').addEventListener('cancel', e => { e.preventDefault(); paperClose(); });
+    $('paperNext').addEventListener('click', paperSubmit);
+    $('paperQtyBtn').addEventListener('click', () => {
+      const qf = $('paperQty');
+      qf.hidden = !qf.hidden;
+      if (!qf.hidden) qf.focus(); else { qf.value = ''; $('paperName').focus(); }
+    });
+    ['paperNext', 'paperQtyBtn', 'paperChips'].forEach(id => $(id).addEventListener('mousedown', e => e.preventDefault()));   // keep the keyboard open
+    $('paperName').addEventListener('input', paperChips);
+    $('paperName').addEventListener('keydown', e => {
+      if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); paperSubmit(); }
+      else if (e.key === 'Backspace' && !e.target.value) paperPullBack();
+    });
+    $('paperQty').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); paperSubmit(); } });
+    $('paperChips').addEventListener('click', e => {
+      const b = e.target.closest('[data-cid]');
+      if (!b) return;
+      const it = findItem(Number(b.dataset.cid));
+      if (!it) return;
+      paperCommit(it.name, 0);
+      $('paperName').value = ''; $('paperQty').value = ''; $('paperQty').hidden = true; paperChips(); $('paperName').focus();
+    });
+    $('paperLines').addEventListener('click', e => {
+      const pend = e.target.closest('[data-pend]');
+      if (pend) {
+        const job = paper.pending.find(p => p.id === Number(pend.dataset.pend));
+        if (job && job.status === 'error') { paper.pending = paper.pending.filter(p => p !== job); paperCommit(job.name + (job.qty !== 1 ? ' ' + job.qty : ''), 0); }
+        return;
+      }
+      const del = e.target.closest('[data-pdel]');
+      if (del) {
+        const id = Number(del.dataset.pdel); paper.editing = null;
+        mutate(async () => { ok(await db.from('items').update({ in_list: false, is_checked: false, updated_at: nowISO() }).eq('id', id)); }).then(() => paperRender());
+        return;
+      }
+      if (e.target.closest('[data-pok]')) { paper.editing = null; paperRender(); return; }
+      if (e.target.closest('input')) return;
+      const li = e.target.closest('.pl[data-id]');
+      if (li) { const id = Number(li.dataset.id); paper.editing = paper.editing === id ? null : id; paperRender(); }
+    });
+    $('paperLines').addEventListener('change', e => {
+      const inp = e.target.closest('[data-pq]');
+      if (inp) setQty(Number(inp.dataset.pq), parseNum(inp.value), inp).then(() => paperRender());
+    });
+    if (window.visualViewport) { window.visualViewport.addEventListener('resize', paperFit); window.visualViewport.addEventListener('scroll', paperFit); }
+
     // ---------- Install as an app + offline notice ----------
     let deferredInstall = null;
     const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
@@ -4380,8 +4606,8 @@ notify pgrst, 'reload schema';`;
     }
     const EVT = { landing_view: 'دیدن صفحه معرفی', signup: 'ثبت‌نام', login: 'ورود', app_open: 'باز کردن برنامه', item_added: 'افزودن کالا',
       item_bought: 'ثبت خرید کالا', trip_ended: 'پایان یک خرید', report_opened: 'دیدن گزارش', list_created: 'ساخت لیست جدید',
-      invite_created: 'ساخت لینک دعوت', invite_joined: 'پیوستن با دعوت', install_click: 'زدن دکمه نصب', chat_sent: 'ارسال پیام گفتگو', push_enabled: 'روشن کردن اعلان', demo_used: 'امتحان دموی صفحه اول', tour_start: 'شروع آموزش', tour_done: 'پایان آموزش', tour_skip: 'رد کردن آموزش', feedback_sent: 'ارسال بازخورد', pwa_installed: 'نصب برنامه', export_data: 'نسخه پشتیبان' };
-    const FUNNEL = ['landing_view', 'signup', 'app_open', 'item_added', 'item_bought', 'trip_ended', 'invite_created', 'invite_joined', 'demo_used', 'tour_done', 'feedback_sent', 'chat_sent', 'push_enabled', 'install_click', 'pwa_installed'];
+      invite_created: 'ساخت لینک دعوت', invite_joined: 'پیوستن با دعوت', install_click: 'زدن دکمه نصب', chat_sent: 'ارسال پیام گفتگو', push_enabled: 'روشن کردن اعلان', demo_used: 'امتحان دموی صفحه اول', paper_open: 'باز کردن کاغذ لیست', tour_start: 'شروع آموزش', tour_done: 'پایان آموزش', tour_skip: 'رد کردن آموزش', feedback_sent: 'ارسال بازخورد', pwa_installed: 'نصب برنامه', export_data: 'نسخه پشتیبان' };
+    const FUNNEL = ['landing_view', 'signup', 'app_open', 'item_added', 'item_bought', 'trip_ended', 'invite_created', 'invite_joined', 'demo_used', 'paper_open', 'tour_done', 'feedback_sent', 'chat_sent', 'push_enabled', 'install_click', 'pwa_installed'];
     const dayFmt = new Intl.DateTimeFormat('fa-IR-u-ca-persian', { month: 'short', day: 'numeric' });
     function daySeries(arr) {
       const rows = (arr || []).slice(-14), max = Math.max(1, ...rows.map(x => x.n));
@@ -4392,7 +4618,7 @@ notify pgrst, 'reload schema';`;
       const body = $('admBody');
       body.innerHTML = '<p class="hint">در حال بارگیری…</p>';
       const r = await db.rpc('admin_stats', { days: Number($('admDays').value) });
-      if (r.error) { body.innerHTML = `<p class="hint">${isMissingFn(r.error) ? 'ابتدا فایل supabase-analytics-update.sql را در SQL Editor اجرا کنید.' : 'دریافت آمار انجام نشد.'}</p>`; return; }
+      if (r.error) { body.innerHTML = `<p class="hint">${isMissingFn(r.error) ? 'ابتدا فایل supabase-analytics-update.sql را در SQL Editor اجرا کنید.' : 'دریافت آمار انجام نشد.<br><small dir="ltr">' + esc(String(r.error.message || r.error.code || '')) + '</small>'}</p>`; return; }
       const d = r.data || {}, f = d.funnel || {}, ev = d.events || {};
       const ret = d.cohort_old > 0 ? fmt(Math.round(d.returning / d.cohort_old * 100)) + '٪' : '—';
       const kpi = (v, l) => `<div class="kpi"><b>${v}</b><span>${l}</span></div>`;

@@ -551,7 +551,12 @@ create table if not exists price_history (
     .pl-ed label { display: flex; align-items: center; gap: 6px; font-size: 14px; color: var(--muted); }
     .pl-ed .btn { min-height: 36px; padding: 0 12px; }
     .pl input { font: inherit; font-size: 17px; color: inherit; background: transparent; border: 0; outline: 0; min-width: 0; }
-    .pl.cur input.pl-name { flex: 1; height: calc(var(--lh) - 4px); }
+    .pl-wrap { position: relative; flex: 1; min-width: 0; height: calc(var(--lh) - 4px); }
+    .pl.cur .pl-wrap input.pl-name { position: relative; z-index: 1; width: 100%; height: 100%; padding: 0; }
+    .pl-ghost { position: absolute; inset: 0; display: flex; align-items: center; white-space: pre; overflow: hidden; font-size: 17px; line-height: 1.4; color: var(--muted); pointer-events: none; }
+    .pl-ghost i { font-style: normal; visibility: hidden; }
+    .pl-ghost b { font-weight: 400; padding: 2px 0; border-radius: 4px; background: color-mix(in srgb, var(--accent) 16%, transparent); color: var(--ink); opacity: .75; }
+    .pchip.lit { border-style: dashed; color: var(--muted); }
     .pl input.pl-qty { width: 58px; height: 36px; text-align: center; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
     .pl input.pl-qty[hidden] { display: none; }
     .pl-qbtn { flex: none; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; background: var(--surface); color: var(--muted); font: inherit; font-size: 16px; cursor: pointer; }
@@ -1185,12 +1190,13 @@ create table if not exists price_history (
         <b>لیست خرید</b><span id="paperCount"></span>
         <button class="btn btn-primary" id="paperDone" type="button">تمام</button>
       </div>
-      <p class="paper-tip" id="paperTip" hidden>هر کالا را بنویسید و «بعدی» (یا Enter) را بزنید. برای تعداد بیشتر از ۱، بعد از اسم عدد بنویسید: <b>شیر ۲</b></p>
+      <p class="paper-tip" id="paperTip" hidden>هر کالا را بنویسید و «بعدی» (یا Enter) را بزنید؛ اگر پیشنهاد کم‌رنگ درست بود، همان Enter آن را می‌پذیرد. برای تعداد بیشتر از ۱، بعد از اسم عدد بنویسید: <b>شیر ۲</b></p>
       <div class="paper-sheet" id="paperSheet">
         <ol class="paper-lines" id="paperLines"></ol>
         <div class="pl cur" id="paperCur">
           <span class="pl-no" id="paperNo"></span>
-          <input class="pl-name" id="paperName" type="text" enterkeyhint="next" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="نام کالا…" aria-label="کالای بعدی">
+          <div class="pl-wrap"><div class="pl-ghost" id="paperGhost" aria-hidden="true"></div>
+            <input class="pl-name" id="paperName" type="text" enterkeyhint="next" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="نام کالا…" aria-label="کالای بعدی"></div>
           <span class="pl-q" id="paperHint"></span>
           <input class="pl-qty" id="paperQty" inputmode="decimal" enterkeyhint="done" placeholder="تعداد" aria-label="تعداد" hidden>
           <button class="pl-qbtn" id="paperQtyBtn" type="button" aria-label="تعداد بیشتر از ۱">×</button>
@@ -4359,12 +4365,27 @@ notify pgrst, 'reload schema';`;
       paperChips();
     }
     function paperScroll() { const s = $('paperSheet'); s.scrollTop = s.scrollHeight; }
+    // Faded completion after what you typed (never edits the field itself, so it is safe with every phone keyboard).
+    const foldCh = s => String(s).replace(/ي/g, 'ی').replace(/ك/g, 'ک').replace(/\u200c/g, ' ').toLowerCase();   // keeps length, so prefixes line up
+    function paperGhostCalc() {
+      const nm = $('paperName'), raw = nm.value.replace(/^\s+/, '');
+      if (!raw || splitQty(raw) || nm.selectionStart !== nm.value.length) return null;
+      const f = foldCh(raw);
+      const best = state.items
+        .filter(i => !i.in_list && i.name.length > raw.length && foldCh(i.name).startsWith(f))
+        .sort((a, b) => freq(b) - freq(a) || a.name.length - b.name.length || byName(a, b))[0];
+      return best ? { item: best, typed: raw, rest: best.name.slice(raw.length) } : null;
+    }
     function paperChips() {
       const raw = $('paperName').value, sp = splitQty(raw), text = sp ? sp.name : raw;
+      const g = paper.ghost = paperGhostCalc();
+      $('paperGhost').innerHTML = g ? `<i>${esc(g.typed)}</i><b>${esc(g.rest)}</b>` : '';
       let list;
       if (normName(text)) list = suggestions(text).filter(i => !(i.in_list && !i.is_checked));
       else list = state.items.filter(i => !i.in_list).sort((a, b) => freq(b) - freq(a) || byName(a, b)).slice(0, 10);
-      $('paperChips').innerHTML = list.map(i => `<button class="pchip" type="button" data-cid="${i.id}">${esc(i.name)}</button>`).join('');
+      if (g) list = list.filter(i => i.id !== g.item.id);
+      $('paperChips').innerHTML = (g ? `<button class="pchip lit" type="button" data-lit="1">فقط «${esc(g.typed.trim())}»</button>` : '')
+        + list.map(i => `<button class="pchip" type="button" data-cid="${i.id}">${esc(i.name)}</button>`).join('');
       $('paperHint').textContent = sp ? '× ' + fmt(sp.qty) : '';
     }
     function paperCommit(raw, qtyField) {
@@ -4392,7 +4413,8 @@ notify pgrst, 'reload schema';`;
     function paperSubmit() {
       const nm = $('paperName'), qf = $('paperQty');
       if (!nm.value.trim()) { if (!qf.hidden) { qf.hidden = true; qf.value = ''; } nm.focus(); return; }
-      paperCommit(nm.value, qf.hidden ? 0 : parseNum(qf.value));
+      const g = paper.ghost;
+      paperCommit(g ? g.item.name : nm.value, qf.hidden ? 0 : parseNum(qf.value));
       nm.value = ''; qf.value = ''; qf.hidden = true;
       paperChips(); nm.focus();
     }
@@ -4435,12 +4457,15 @@ notify pgrst, 'reload schema';`;
     });
     ['paperNext', 'paperQtyBtn', 'paperChips'].forEach(id => $(id).addEventListener('mousedown', e => e.preventDefault()));   // keep the keyboard open
     $('paperName').addEventListener('input', paperChips);
+    ['keyup', 'pointerup', 'blur'].forEach(ev => $('paperName').addEventListener(ev, paperChips));
     $('paperName').addEventListener('keydown', e => {
       if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); paperSubmit(); }
       else if (e.key === 'Backspace' && !e.target.value) paperPullBack();
     });
     $('paperQty').addEventListener('keydown', e => { if (e.key === 'Enter' && !e.isComposing) { e.preventDefault(); paperSubmit(); } });
     $('paperChips').addEventListener('click', e => {
+      const lit = e.target.closest('[data-lit]');
+      if (lit) { paperCommit($('paperName').value, 0); $('paperName').value = ''; $('paperQty').value = ''; $('paperQty').hidden = true; paperChips(); $('paperName').focus(); return; }
       const b = e.target.closest('[data-cid]');
       if (!b) return;
       const it = findItem(Number(b.dataset.cid));

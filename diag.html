@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>تست اتصال ایناروبگیر</title>
+<style>
+  body { font-family: system-ui, Tahoma, sans-serif; margin: 0; padding: 16px; background: #f4f4fb; color: #1b1f5c; line-height: 1.8; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  p.s { margin: 0 0 12px; color: #555; font-size: 14px; }
+  button { font: inherit; font-size: 16px; padding: 10px 18px; border: 0; border-radius: 10px; background: #4347c9; color: #fff; margin: 4px 4px 12px 0; }
+  .row { display: flex; gap: 8px; padding: 8px 10px; margin-bottom: 6px; border-radius: 10px; background: #fff; font-size: 14px; }
+  .row b { flex: none; width: 22px; text-align: center; }
+  .ok b { color: #1a8f4c; } .bad b { color: #d33; } .warn b { color: #c88a00; } .run b { color: #888; }
+  .row div { flex: 1; min-width: 0; word-break: break-word; }
+  .row small { display: block; color: #666; direction: ltr; text-align: left; }
+  h2 { font-size: 15px; margin: 16px 0 6px; }
+  pre { white-space: pre-wrap; direction: ltr; text-align: left; background: #fff; padding: 10px; border-radius: 10px; font-size: 12px; }
+</style>
+</head>
+<body>
+<h1>تست اتصال ایناروبگیر</h1>
+<p class="s">این صفحه بررسی می‌کند چه چیزی از روی این گوشی/اینترنت در دسترس است. فیلترشکن را خاموش کنید و دکمه را بزنید.</p>
+<button id="go">شروع تست</button><button id="copy" hidden>کپی گزارش</button>
+<div id="out"></div>
+<h2>گزارش (برای فرستادن)</h2>
+<pre id="rep">هنوز اجرا نشده.</pre>
+
+<script>
+const SUPA = "https://geyyswjrbpgearzwvbuj.supabase.co", KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImdleXlzd2pyYnBnZWFyend2YnVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE1NzAxMzQsImV4cCI6MjEwNzE0NjEzNH0.m42-eMsc5ZCucbr81Y46sWinChPKhNajv6lWoVZHjLE", REF = "geyyswjrbpgearzwvbuj";
+const out = document.getElementById('out'), rep = document.getElementById('rep');
+let lines = [];
+function row(state, title, detail) {
+  const el = document.createElement('div'); el.className = 'row ' + state;
+  el.innerHTML = '<b>' + ({ ok: '✓', bad: '✗', warn: '!', run: '…' }[state]) + '</b><div>' + title + (detail ? '<small></small>' : '') + '</div>';
+  if (detail) el.querySelector('small').textContent = detail;
+  out.appendChild(el); return el;
+}
+function done(el, state, title, detail) {
+  el.className = 'row ' + state; el.querySelector('b').textContent = { ok: '✓', bad: '✗', warn: '!' }[state];
+  const d = el.querySelector('div'); d.innerHTML = title + '<small></small>'; d.querySelector('small').textContent = detail || '';
+  lines.push((state === 'ok' ? 'OK   ' : state === 'bad' ? 'FAIL ' : 'WARN ') + title.replace(/<[^>]+>/g, '') + (detail ? ' | ' + detail : ''));
+}
+const timeout = (p, ms) => Promise.race([p, new Promise((_, r) => setTimeout(() => r(new Error('timeout ' + ms / 1000 + 's')), ms))]);
+async function head(path, expectType) {
+  const el = row('run', path);
+  const t0 = performance.now();
+  try {
+    const r = await timeout(fetch(path + (path.includes('?') ? '&' : '?') + 't=' + Date.now(), { cache: 'no-store' }), 12000);
+    const buf = await r.arrayBuffer(); const ms = Math.round(performance.now() - t0);
+    const ct = r.headers.get('content-type') || '(none)';
+    const typeOk = !expectType || expectType.test(ct);
+    done(el, r.ok && typeOk && buf.byteLength > 0 ? 'ok' : (r.ok ? 'warn' : 'bad'), path + (r.ok ? '' : ' — پیدا نشد'),
+      r.status + ' · ' + ct + ' · ' + Math.round(buf.byteLength / 1024) + ' KB · ' + ms + ' ms' + (!typeOk ? ' · نوع فایل (MIME) درست نیست' : ''));
+    return r.ok ? new TextDecoder().decode(buf.slice(0, 400000)) : null;
+  } catch (e) { done(el, 'bad', path + ' — دریافت نشد', String(e.message || e)); return null; }
+}
+async function ping(label, url, init) {
+  const el = row('run', label), t0 = performance.now();
+  try {
+    const r = await timeout(fetch(url, init), 10000);
+    done(el, 'ok', label, (r.type === 'opaque' ? 'پاسخ آمد' : r.status) + ' · ' + Math.round(performance.now() - t0) + ' ms');
+    return true;
+  } catch (e) { done(el, 'bad', label + ' — در دسترس نیست', String(e.message || e)); return false; }
+}
+function ws(label, url) {
+  return new Promise(res => {
+    const el = row('run', label), t0 = performance.now(); let fin = false;
+    const finish = (st, d) => { if (fin) return; fin = true; try { s.close(); } catch (e) {} done(el, st, label + (st === 'ok' ? '' : ' — برقرار نشد'), d); res(st === 'ok'); };
+    let s; try { s = new WebSocket(url); } catch (e) { finish('bad', String(e)); return; }
+    s.onopen = () => finish('ok', 'وصل شد · ' + Math.round(performance.now() - t0) + ' ms');
+    s.onerror = () => finish('bad', 'خطا (احتمالاً WebSocket مسدود است)');
+    setTimeout(() => finish('bad', 'timeout 10s'), 10000);
+  });
+}
+async function run() {
+  out.innerHTML = ''; lines = [];
+  lines.push('time ' + new Date().toISOString()); lines.push('page ' + location.href); lines.push('ua ' + navigator.userAgent.slice(0, 120));
+  const secure = location.protocol === 'https:';
+  const e0 = row('run', 'آدرس'); done(e0, secure ? 'ok' : 'bad', secure ? 'سایت با https باز شده' : 'سایت با https باز نشده (نصب برنامه، اعلان و ورود به درستی کار نمی‌کنند)', location.origin);
+
+  const html = await head('index.html', /html/i);
+  if (html) {
+    const hosts = [...new Set((html.match(/https?:\/\/[a-z0-9.-]+/gi) || []))].filter(h => !/supabase\.co|www\.w3\.org/.test(h));
+    const old = /jsdelivr/.test(html), hasLib = /src="supabase\.js"/.test(html);
+    const e1 = row('run', 'نسخه صفحه');
+    done(e1, old || !hasLib ? 'bad' : 'ok', old || !hasLib ? 'نسخه قدیمی index.html روی سایت است (هنوز از jsdelivr استفاده می‌کند)' : 'نسخه جدید index.html آپلود شده', hosts.length ? 'سرورهای بیرونی: ' + hosts.join(', ') : 'بدون وابستگی بیرونی');
+  }
+  await head('supabase.js', /javascript|ecmascript/i);
+  await head('Vazirmatn.woff2', /font|woff|octet/i);
+  await head('sw.js', /javascript|ecmascript/i);
+  await head('manifest.webmanifest', /json|manifest/i);
+  await head('icon-192.png', /png/i);
+
+  const e2 = row('run', 'سرویس‌ورکر');
+  if (!('serviceWorker' in navigator)) done(e2, 'warn', 'مرورگر سرویس‌ورکر ندارد (یا صفحه https نیست)');
+  else { try { const regs = await navigator.serviceWorker.getRegistrations(); done(e2, 'ok', 'سرویس‌ورکر پشتیبانی می‌شود', regs.length + ' ثبت‌شده'); } catch (err) { done(e2, 'warn', 'سرویس‌ورکر', String(err)); } }
+
+  const a = await ping('Supabase (ورود و داده)', SUPA + '/auth/v1/settings', { headers: { apikey: KEY } });
+  await ping('Supabase REST', SUPA + '/rest/v1/', { headers: { apikey: KEY } });
+  await ws('Supabase Realtime (به‌روزرسانی زنده و چت)', 'wss://' + REF + '.supabase.co/realtime/v1/websocket?apikey=' + KEY + '&vsn=1.0.0');
+
+  row('run', 'برای مقایسه (اینها دیگر لازم نیستند)').remove();
+  await ping('jsdelivr (CDN قدیمی)', 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js', { mode: 'no-cors' });
+  await ping('github.io', 'https://github.com/favicon.ico', { mode: 'no-cors' });
+  const bad = lines.filter(l => l.startsWith('FAIL')).length;
+  lines.push('summary fails=' + bad);
+  rep.textContent = lines.join('\n'); document.getElementById('copy').hidden = false;
+}
+document.getElementById('go').onclick = () => { document.getElementById('go').disabled = true; run().finally(() => { document.getElementById('go').disabled = false; document.getElementById('go').textContent = 'تست دوباره'; }); };
+document.getElementById('copy').onclick = async () => { try { await navigator.clipboard.writeText(rep.textContent); document.getElementById('copy').textContent = 'کپی شد'; } catch (e) { const r = document.createRange(); r.selectNode(rep); getSelection().removeAllRanges(); getSelection().addRange(r); } };
+</script>
+</body>
+</html>

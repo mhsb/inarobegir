@@ -1,10 +1,10 @@
 // ایناروبگیر service worker: lets the app open instantly and without a connection.
 // It never caches or answers data requests (Supabase), so lists are always live.
-const VERSION = 'inarobeg-v1';
-const SHELL = ['./', './index.html', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
+const VERSION = 'inarobeg-v2';
+const SHELL = ['./', './index.html', './supabase.js', './Vazirmatn.woff2', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
-  e.waitUntil(caches.open(VERSION).then(c => c.addAll(SHELL)).catch(() => {}).then(() => self.skipWaiting()));
+  e.waitUntil(caches.open(VERSION).then(c => Promise.all(SHELL.map(u => c.add(u).catch(() => {})))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', e => {
@@ -42,12 +42,6 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // Pinned library and font files from the CDN: they never change, so keep them.
-  if (url.hostname === 'cdn.jsdelivr.net' || url.hostname === 'fonts.gstatic.com') {
-    e.respondWith(
-      caches.match(req).then(hit => hit || fetch(req).then(res => { if (res.ok || res.type === 'opaque') caches.open(VERSION).then(c => c.put(req, res.clone())); return res; }))
-    );
-  }
   // Everything else (Supabase API, auth, realtime) goes straight to the network.
 });
 

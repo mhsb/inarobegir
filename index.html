@@ -103,14 +103,13 @@ create table if not exists price_history (
   <meta name="apple-mobile-web-app-title" content="ایناروبگیر">
   <meta name="application-name" content="ایناروبگیر">
 
-  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
-  <!-- Font loads without blocking the first paint (system font is shown meanwhile). -->
-  <link rel="preload" as="style" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v3.3.0/Vazirmatn-font-face.css" onload="this.onload=null;this.rel='stylesheet'">
-  <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@v3.3.0/Vazirmatn-font-face.css"></noscript>
-  <!-- Pinned version + defer: the page paints first, the library loads in parallel. -->
-  <script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.117.1/dist/umd/supabase.js"></script>
+  <!-- Everything is served from this same site (no outside CDN), so the app opens wherever the site itself opens. -->
+  <link rel="preload" as="font" type="font/woff2" href="Vazirmatn.woff2" crossorigin>
+  <!-- supabase-js 2.117.1, saved next to this page. -->
+  <script defer src="supabase.js"></script>
 
   <style>
+    @font-face { font-family: 'Vazirmatn'; src: url('Vazirmatn.woff2') format('woff2'); font-weight: 100 900; font-style: normal; font-display: swap; }
     /* ===== Brand palette: indigo + amber =====
        --accent = brand indigo   --saffron = amber accent   --foot = deep indigo band   --c1..--c6 = shelf / person colours */
     :root {
@@ -1359,7 +1358,7 @@ create table if not exists price_history (
 
   <script>
   document.addEventListener('DOMContentLoaded', () => {
-    if (typeof supabase === 'undefined') {            // CDN blocked or offline
+    if (typeof supabase === 'undefined') {            // library file missing or offline
       document.documentElement.classList.remove('has-session');
       const m = document.getElementById('authMsg');
       m.hidden = false;

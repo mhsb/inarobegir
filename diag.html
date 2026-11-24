@@ -22,7 +22,7 @@
 <body>
 <h1>تست اتصال ایناروبگیر</h1>
 <p class="s">این صفحه بررسی می‌کند چه چیزی از روی این گوشی/اینترنت در دسترس است. فیلترشکن را خاموش کنید و دکمه را بزنید.</p>
-<button id="go">شروع تست</button><button id="copy" hidden>کپی گزارش</button>
+<button id="go">شروع تست</button><button id="reset" style="background:#d33">حذف سرویس‌ورکر و کش، بعد تست دوباره</button><button id="copy" hidden>کپی گزارش</button>
 <div id="out"></div>
 <h2>گزارش (برای فرستادن)</h2>
 <pre id="rep">هنوز اجرا نشده.</pre>
@@ -95,7 +95,11 @@ async function run() {
 
   const e2 = row('run', 'سرویس‌ورکر');
   if (!('serviceWorker' in navigator)) done(e2, 'warn', 'مرورگر سرویس‌ورکر ندارد (یا صفحه https نیست)');
-  else { try { const regs = await navigator.serviceWorker.getRegistrations(); done(e2, 'ok', 'سرویس‌ورکر پشتیبانی می‌شود', regs.length + ' ثبت‌شده'); } catch (err) { done(e2, 'warn', 'سرویس‌ورکر', String(err)); } }
+  else { try {
+    const regs = await navigator.serviceWorker.getRegistrations(), ks = ('caches' in window) ? await caches.keys() : [];
+    const info = regs.map(r => { const w = r.active || r.waiting || r.installing; return w ? w.scriptURL.replace(location.origin, '') + ' (' + w.state + ')' : 'بدون نسخه فعال'; }).join('; ');
+    done(e2, 'ok', 'سرویس‌ورکر: ' + regs.length + ' ثبت‌شده · ' + (navigator.serviceWorker.controller ? 'این صفحه تحت کنترل آن است' : 'این صفحه تحت کنترل آن نیست'), info + ' | cache: ' + (ks.join(', ') || 'خالی'));
+  } catch (err) { done(e2, 'warn', 'سرویس‌ورکر', String(err)); } }
 
   const a = await ping('Supabase (ورود و داده)', SUPA + '/auth/v1/settings', { headers: { apikey: KEY } });
   await ping('Supabase REST', SUPA + '/rest/v1/', { headers: { apikey: KEY } });
@@ -109,6 +113,12 @@ async function run() {
   rep.textContent = lines.join('\n'); document.getElementById('copy').hidden = false;
 }
 document.getElementById('go').onclick = () => { document.getElementById('go').disabled = true; run().finally(() => { document.getElementById('go').disabled = false; document.getElementById('go').textContent = 'تست دوباره'; }); };
+document.getElementById('reset').onclick = async () => {
+  out.innerHTML = ''; row('run', 'در حال حذف سرویس‌ورکر و کش…');
+  try { if ('serviceWorker' in navigator) { const regs = await navigator.serviceWorker.getRegistrations(); await Promise.all(regs.map(r => r.unregister())); } if ('caches' in window) { const ks = await caches.keys(); await Promise.all(ks.map(k => caches.delete(k))); } } catch (e) {}
+  location.replace(location.pathname + '?clean=' + Date.now());
+};
+if (/clean=/.test(location.search)) { setTimeout(() => document.getElementById('go').click(), 300); }
 document.getElementById('copy').onclick = async () => { try { await navigator.clipboard.writeText(rep.textContent); document.getElementById('copy').textContent = 'کپی شد'; } catch (e) { const r = document.createRange(); r.selectNode(rep); getSelection().removeAllRanges(); getSelection().addRange(r); } };
 </script>
 </body>

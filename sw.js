@@ -1,6 +1,6 @@
 // ایناروبگیر service worker: lets the app open instantly and without a connection.
 // It never caches or answers data requests (Supabase), so lists are always live.
-const VERSION = 'inarobeg-v2';
+const VERSION = 'inarobeg-v3';
 const SHELL = ['./', './index.html', './supabase.js', './Vazirmatn.woff2', './manifest.webmanifest', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
@@ -14,28 +14,35 @@ self.addEventListener('activate', e => {
   );
 });
 
+const NAV_TIMEOUT_MS = 4000;                       // on a slow or throttled network, open the saved app instead of waiting forever
+const isAppPage = u => u.pathname.endsWith('/') || u.pathname.endsWith('/index.html');
+
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
   const url = new URL(req.url);
 
-  // The page itself: newest version when online, saved copy when offline.
+  // Pages. Only the app itself is saved (never diag.html, error pages or anything else).
   if (req.mode === 'navigate') {
-    e.respondWith(
-      fetch(req).then(res => {
-        const copy = res.clone();
-        caches.open(VERSION).then(c => c.put('./index.html', copy));
+    e.respondWith((async () => {
+      const app = isAppPage(url);
+      const cached = app ? await caches.match('./index.html') : null;
+      const net = fetch(req).then(res => {
+        if (app && res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put('./index.html', copy)); }
         return res;
-      }).catch(() => caches.match('./index.html').then(r => r || caches.match('./')))
-    );
+      });
+      if (!cached) return net;                     // first visit, or not the app page: just use the network
+      return Promise.race([net.catch(() => cached), new Promise(r => setTimeout(() => r(cached), NAV_TIMEOUT_MS))]);
+    })());
     return;
   }
 
-  // Our own files (icons, manifest): show saved copy, refresh in the background.
+  // Our own files (library, font, icons, manifest): saved copy right away, refreshed in the background.
   if (url.origin === location.origin) {
     e.respondWith(
       caches.match(req).then(hit => {
-        const net = fetch(req).then(res => { if (res.ok) caches.open(VERSION).then(c => c.put(req, res.clone())); return res; }).catch(() => hit);
+        const net = fetch(req).then(res => { if (res.ok) { const copy = res.clone(); caches.open(VERSION).then(c => c.put(req, copy)); } return res; })
+          .catch(() => hit || Response.error());
         return hit || net;
       })
     );
